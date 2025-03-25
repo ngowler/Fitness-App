@@ -8,3 +8,5 @@ router.get("/:id");
 router.put("/:id");
 router.delete("/:id");
 router.post("/:id/upgrade");
+
+export default router;
