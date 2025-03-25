@@ -21,4 +21,3 @@ export type User = {
       goals: string;
     };
   };
-  
