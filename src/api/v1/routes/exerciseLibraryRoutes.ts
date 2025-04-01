@@ -10,7 +10,7 @@ router.get("/");
 router.get("/:id");
 // Update exercises in the library
 router.put("/:id");
-//Remove an exercise from the library
+// Remove an exercise from the library
 router.delete("/:id");
 
 export default router;
