@@ -36,14 +36,21 @@ export const getAllQuestions = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const userId = res.locals.uid;
+        const userId: string = res.locals.uid;
+        const userRole: string = res.locals.role;
 
         if (!userId) {
             res.status(400).json({ message: "User ID is missing" });
             return;
         }
 
-        const questions: string[] = await questionService.getAllQuestionsByUserId(userId);
+        let questions: string[];
+
+        if (userRole === "trainer") {
+            questions = await questionService.getAllQuestions();
+        } else {
+            questions = await questionService.getAllQuestionsByUserId(userId);
+        }
 
         if (!questions || questions.length === 0) {
             res.status(404).json({ message: "No questions found" });
