@@ -19,8 +19,8 @@ export const postExerciseLibrarySchema: ObjectSchema = Joi.object({
         .valid("Low", "Medium", "High")
         .required()
         .messages({
-            "any.only": "Intensity must be one of 'Low', 'Medium', or 'High'",
             "any.required": "Intensity is required",
+            "any.only": "Intensity must be one of 'Low', 'Medium', or 'High'",
         }),
 });
 
