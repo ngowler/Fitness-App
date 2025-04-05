@@ -15,10 +15,20 @@ const COLLECTION: string = "questions";
  * @param {Partial<Question>} questionData - The data for the new question.
  * @returns {Promise<Question>}
  */
-export const createQuestion = async (questionData: Partial<Question>): Promise<Question> => {
+/**
+ * Create a new question for a trainer.
+ * @param {Partial<Question>} questionData - The data for the new question.
+ * @param {string} currentUserId - The ID of the user submitting the question.
+ * @returns {Promise<Question>}
+ */
+export const createQuestion = async (questionData: Partial<Question>, currentUserId: string): Promise<Question> => {
     try {
+        if (!currentUserId) {
+            throw new Error("User ID is required to submit a question.");
+        }
+
         const dateAsked = new Date().toISOString();
-        const completeQuestionData = { ...questionData, dateAsked };
+        const completeQuestionData = { ...questionData, userId: currentUserId, dateAsked };
 
         const id = await createDocument(COLLECTION, completeQuestionData);
         return { id, ...completeQuestionData } as Question;
@@ -29,7 +39,6 @@ export const createQuestion = async (questionData: Partial<Question>): Promise<Q
         );
     }
 };
-
 
 /**
  * Retrieve all questions.
@@ -91,15 +100,21 @@ export const getQuestionById = async (id: string): Promise<Question> => {
  * Respond to a specific question.
  * @param {string} id - The ID of the question to respond to.
  * @param {Partial<Question>} responseData - The response to the question.
+ * @param {string} currentTrainerId - The ID of the trainer responding to the question.
  * @returns {Promise<Question>}
  */
 export const respondToQuestion = async (
     id: string,
-    responseData: Partial<Question>
+    responseData: Partial<Question>,
+    currentTrainerId: string
 ): Promise<Question> => {
     try {
+        if (!currentTrainerId) {
+            throw new Error("Trainer ID is required to respond to a question.");
+        }
+
         const dateResponded = new Date().toISOString();
-        const updatedData = { ...responseData, dateResponded };
+        const updatedData = { ...responseData, trainerId: currentTrainerId, dateResponded };
 
         await updateDocument(COLLECTION, id, updatedData);
 
@@ -111,4 +126,3 @@ export const respondToQuestion = async (
         );
     }
 };
-

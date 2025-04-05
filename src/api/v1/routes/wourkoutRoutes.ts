@@ -22,10 +22,10 @@ router.post("/", validateRequest(postWorkoutSchema), createWorkout);
 // Retrieve all workouts for the authenticated user
 router.get("/", validateRequest(getWorkoutsByUserSchema), getAllWorkouts);
 // Retrieve a specific workout by ID
-router.get("/:id", validateRequest(getWorkoutByIdSchema), getWorkoutById);
+router.get("/:workoutId", validateRequest(getWorkoutByIdSchema), getWorkoutById);
 // Edit a workout
-router.put("/:id", validateRequest(putWorkoutSchema), updateWorkout);
+router.put("/:workoutId", validateRequest(putWorkoutSchema), updateWorkout);
 // Delete a workout
-router.delete("/:id", validateRequest(deleteWorkoutSchema), deleteWorkout);
+router.delete("/:workoutId", validateRequest(deleteWorkoutSchema), deleteWorkout);
 
 export default router;

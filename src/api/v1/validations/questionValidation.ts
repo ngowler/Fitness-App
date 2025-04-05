@@ -11,7 +11,6 @@ export const postQuestionSchema: ObjectSchema = Joi.object({
     }),
 });
 
-
 export const getQuestionsByUserSchema: ObjectSchema = Joi.object({
     userId: Joi.string().required().messages({
         "any.required": "User ID is required",
@@ -40,4 +39,3 @@ export const putQuestionSchema: ObjectSchema = Joi.object({
         "string.empty": "Response cannot be empty",
     }),
 });
-
