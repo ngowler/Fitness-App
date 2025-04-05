@@ -44,7 +44,7 @@ export const getAllQuestions = async (
             return;
         }
 
-        let questions: string[];
+        let questions: Question[];
 
         if (userRole === "trainer") {
             questions = await questionService.getAllQuestions();
