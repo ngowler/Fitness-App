@@ -1,5 +1,4 @@
 import {
-    getDocuments,
     createDocument,
     updateDocument,
     deleteDocument,
