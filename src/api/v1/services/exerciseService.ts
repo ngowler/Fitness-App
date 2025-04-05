@@ -6,23 +6,40 @@ import {
     getDocumentById,
 } from "../repositories/firestoreRepository";
 import { Exercise } from "../models/exerciseModel";
+import { Workout } from "../models/workoutModel";
 import { ServiceError } from "../errors/errors";
 import { getErrorMessage, getErrorCode } from "../utils/errorUtils";
 
 const COLLECTION: string = "exercises";
 
 /**
- * Create a new exercise for a workout.
+ * Create a new exercise for a workout and update the workout's exercises list.
  * @param {Partial<Exercise>} exerciseData - The data for the new exercise.
  * @returns {Promise<Exercise>}
  */
 export const createExercise = async (exerciseData: Partial<Exercise>): Promise<Exercise> => {
     try {
-        const id = await createDocument(COLLECTION, exerciseData);
-        return { id, ...exerciseData } as Exercise;
+        if (!exerciseData.workoutId) {
+            throw new Error("Workout ID is required to create an exercise");
+        }
+
+        const id: string = await createDocument("Exercise", exerciseData);
+        const newExercise: Exercise = { id, ...exerciseData } as Exercise;
+
+        const workoutSnapshot = await getDocumentById("Workout", exerciseData.workoutId);
+        if (!workoutSnapshot.exists) {
+            throw new Error(`Workout with ID ${exerciseData.workoutId} not found`);
+        }
+
+        const workoutData: Workout = workoutSnapshot.data() as Workout;
+
+        const updatedExercises: Exercise[] = [...workoutData.exercises, newExercise];
+        await updateDocument("Workout", exerciseData.workoutId, { exercises: updatedExercises });
+
+        return newExercise;
     } catch (error: unknown) {
         throw new ServiceError(
-            `Failed to create exercise: ${getErrorMessage(error)}`,
+            `Failed to create exercise and update workout: ${getErrorMessage(error)}`,
             getErrorCode(error)
         );
     }

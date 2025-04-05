@@ -4,10 +4,6 @@ export const exerciseSchema: ObjectSchema = Joi.object({
     id: Joi.string().optional().messages({
         "string.empty": "Exercise ID cannot be empty",
     }),
-    workoutId: Joi.string().required().messages({
-        "any.required": "Workout ID is required",
-        "string.empty": "Workout ID cannot be empty",
-    }),
     name: Joi.string().required().messages({
         "any.required": "Exercise name is required",
         "string.empty": "Exercise name cannot be empty",
@@ -49,13 +45,27 @@ export const postWorkoutSchema: ObjectSchema = Joi.object({
     }),
     date: Joi.string().isoDate().required().messages({
         "any.required": "Date is required",
-        "date.format": "Date must be in ISO 8601 format",
+        "string.isoDate": "Date must be in ISO 8601 format",
     }),
-    exercises: Joi.array().items(exerciseSchema).required().messages({
-        "any.required": "Exercises are required",
-        "array.base": "Exercises must be an array of valid Exercise objects",
+    exerciseLibraryIds: Joi.array().items(Joi.string()).optional().messages({
+        "array.base": "Exercise library IDs must be an array of strings",
     }),
+    numberOfExercises: Joi.number().optional().min(1).messages({
+        "number.base": "Number of exercises must be a number",
+        "number.min": "Number of exercises must be at least 1",
+    }),
+    exercises: Joi.array()
+        .items(exerciseSchema)
+        .min(1)
+        .required()
+        .messages({
+            "any.required": "Exercises are required",
+            "array.base": "Exercises must be an array of valid Exercise objects",
+            "array.min": "A workout must include at least one exercise",
+        }),
 });
+
+
 
 export const getWorkoutsByUserSchema: ObjectSchema = Joi.object({
     userId: Joi.string().required().messages({
@@ -86,10 +96,10 @@ export const putWorkoutSchema: ObjectSchema = Joi.object({
         "string.empty": "Description cannot be empty",
     }),
     date: Joi.string().isoDate().optional().messages({
-        "date.format": "Date must be in ISO 8601 format",
+        "string.isoDate": "Date must be in ISO 8601 format",
     }),
-    exercises: Joi.array().items(Joi.string()).optional().messages({
-        "array.base": "Exercises must be an array of strings",
+    exercises: Joi.array().items(exerciseSchema).optional().messages({
+        "array.base": "Exercises must be an array of valid Exercise objects",
     }),
 });
 

@@ -5,6 +5,6 @@ export type Exercise = {
     equipment: string[];
     musclesWorked: string[];
     intensity: "Low" | "Medium" | "High";
-    duration?: number;
-    reps?: number;
+    sets?: number; // enter this in updateExercise
+    reps?: number; // enter this in updateExercise
 };
