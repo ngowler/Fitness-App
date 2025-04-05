@@ -17,8 +17,11 @@ const COLLECTION: string = "questions";
  */
 export const createQuestion = async (questionData: Partial<Question>): Promise<Question> => {
     try {
-        const id = await createDocument(COLLECTION, questionData);
-        return { id, ...questionData } as Question;
+        const dateAsked = new Date().toISOString();
+        const completeQuestionData = { ...questionData, dateAsked };
+
+        const id = await createDocument(COLLECTION, completeQuestionData);
+        return { id, ...completeQuestionData } as Question;
     } catch (error: unknown) {
         throw new ServiceError(
             `Failed to create question: ${getErrorMessage(error)}`,
@@ -26,6 +29,7 @@ export const createQuestion = async (questionData: Partial<Question>): Promise<Q
         );
     }
 };
+
 
 /**
  * Retrieve all questions.
@@ -94,8 +98,12 @@ export const respondToQuestion = async (
     responseData: Partial<Question>
 ): Promise<Question> => {
     try {
-        await updateDocument(COLLECTION, id, responseData);
-        return { id, ...responseData } as Question;
+        const dateResponded = new Date().toISOString();
+        const updatedData = { ...responseData, dateResponded };
+
+        await updateDocument(COLLECTION, id, updatedData);
+
+        return { id, ...updatedData } as Question;
     } catch (error: unknown) {
         throw new ServiceError(
             `Failed to respond to question ${id}: ${getErrorMessage(error)}`,
@@ -103,3 +111,4 @@ export const respondToQuestion = async (
         );
     }
 };
+
