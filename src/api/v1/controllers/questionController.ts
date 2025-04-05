@@ -7,6 +7,9 @@ import { HTTP_STATUS } from "../../../constants/httpConstants";
 /**
  * @description Submit a new question to a trainer.
  * @route POST /question/
+ * @param req - Express request object
+ * @param res - Express response object
+ * @param next - Express next function to pass control to the next middleware
  * @returns {Promise<void>}
  */
 export const createQuestion = async (
@@ -15,7 +18,13 @@ export const createQuestion = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const newQuestion: Question = await questionService.createQuestion(req.body);
+        const currentUserId = res.locals.uid;
+
+        if (!currentUserId) {
+            throw new Error("User ID is required to submit a question.");
+        }
+
+        const newQuestion = await questionService.createQuestion(req.body, currentUserId);
 
         res.status(HTTP_STATUS.CREATED).json(
             successResponse(newQuestion, "Question Submitted")
@@ -96,6 +105,9 @@ export const getQuestionById = async (
 /**
  * @description Respond to a question.
  * @route PUT /question/:id
+ * @param req - Express request object
+ * @param res - Express response object
+ * @param next - Express next function to pass control to the next middleware
  * @returns {Promise<void>}
  */
 export const respondToQuestion = async (
@@ -104,9 +116,16 @@ export const respondToQuestion = async (
     next: NextFunction
 ): Promise<void> => {
     try {
+        const currentTrainerId = res.locals.uid;
+
+        if (!currentTrainerId) {
+            throw new Error("Trainer ID is required to respond to a question.");
+        }
+
         const response: Question = await questionService.respondToQuestion(
             req.params.id,
-            req.body
+            req.body,
+            currentTrainerId
         );
 
         res.status(HTTP_STATUS.OK).json(

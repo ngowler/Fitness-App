@@ -13,11 +13,6 @@ const COLLECTION: string = "questions";
 /**
  * Create a new question for a trainer.
  * @param {Partial<Question>} questionData - The data for the new question.
- * @returns {Promise<Question>}
- */
-/**
- * Create a new question for a trainer.
- * @param {Partial<Question>} questionData - The data for the new question.
  * @param {string} currentUserId - The ID of the user submitting the question.
  * @returns {Promise<Question>}
  */
