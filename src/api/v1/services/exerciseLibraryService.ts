@@ -30,7 +30,7 @@ export const createExercise = async (exercise: Partial<ExerciseLibrary>): Promis
 
 /**
  * @description Get all exercises.
- * @param {any} query - Query parameters for filtering exercises.
+ * @param {any} queryParams - Query parameters for filtering exercises.
  * @returns {Promise<ExerciseLibrary[]>}
  */
 export const getAllExercises = async (queryParams: any): Promise<ExerciseLibrary[]> => {
