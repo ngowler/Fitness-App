@@ -34,7 +34,7 @@ describe("Workout Routes", () => {
                         equipment: ["None"],
                         musclesWorked: ["Chest", "Triceps"],
                         intensity: "Medium",
-                        duration: 30,
+                        sets: 5,
                         reps: 12,
                     },
                 ],
@@ -62,7 +62,7 @@ describe("Workout Routes", () => {
         });
     });
 
-    describe("GET /api/v1/workout/:workoutId", () => {
+    describe("GET /api/v1/workout/:id", () => {
         it("should call getWorkoutById controller", async () => {
             const id = "workout123";
 
@@ -73,7 +73,7 @@ describe("Workout Routes", () => {
         });
     });
 
-    describe("PUT /api/v1/workout/:workoutId", () => {
+    describe("PUT /api/v1/workout/:id", () => {
         it("should call updateWorkout controller", async () => {
             const id = "workout123";
             const updatedWorkout = {
@@ -86,7 +86,7 @@ describe("Workout Routes", () => {
                         equipment: ["None"],
                         musclesWorked: ["Chest", "Triceps"],
                         intensity: "High",
-                        duration: 40,
+                        sets: 5,
                         reps: 15,
                     },
                 ],
@@ -101,7 +101,7 @@ describe("Workout Routes", () => {
         });
     });
 
-    describe("DELETE /api/v1/workout/:workoutId", () => {
+    describe("DELETE /api/v1/workout/:id", () => {
         it("should call deleteWorkout controller", async () => {
             const id = "workout123";
 
