@@ -1,5 +1,6 @@
 import express, { Express } from "express";
 import dotenv from "dotenv";
+import morgan from "morgan";
 
 dotenv.config();
 
@@ -13,6 +14,8 @@ import wourkoutRoutes from "./api/v1/routes/wourkoutRoutes"
 
 const app: Express = express();
 app.use(express.json());
+
+app.use(morgan("combined"));
 
 app.use("/api/v1/exercise-library", exerciseLibraryRoutes);
 app.use("/api/v1/exercise", exerciseRoutes);
