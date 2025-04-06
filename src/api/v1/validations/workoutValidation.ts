@@ -23,8 +23,8 @@ export const exerciseSchema: ObjectSchema = Joi.object({
             "any.required": "Intensity is required",
             "any.only": "Intensity must be 'Low', 'Medium', or 'High'",
         }),
-    duration: Joi.number().optional().messages({
-        "number.base": "Duration must be a number",
+    sets: Joi.number().optional().messages({
+        "number.base": "Sets must be a number",
     }),
     reps: Joi.number().optional().messages({
         "number.base": "Reps must be a number",
@@ -64,8 +64,6 @@ export const postWorkoutSchema: ObjectSchema = Joi.object({
             "array.min": "A workout must include at least one exercise",
         }),
 });
-
-
 
 export const getWorkoutsByUserSchema: ObjectSchema = Joi.object({
     userId: Joi.string().required().messages({

@@ -52,7 +52,7 @@ export const createWorkout = async (
         const workoutExercises: Exercise[] = selectedExercises.map((exercise: Exercise) => ({
             ...exercise,
             workoutId,
-            duration: 0,
+            sets: 0,
             reps: 0,
         }));
 
