@@ -25,7 +25,6 @@ jest.mock("../src/api/v1/repositories/firestoreRepository", () => ({
 }));
 
 describe("Exercise Service", () => {
-    // Tests for createExercise
     describe("createExercise", () => {
         beforeEach(() => {
             jest.clearAllMocks();
@@ -76,7 +75,6 @@ describe("Exercise Service", () => {
         });
     });
 
-    // Tests for getAllExercises
     describe("getAllExercises", () => {
         beforeEach(() => {
             jest.clearAllMocks();
@@ -129,7 +127,6 @@ describe("Exercise Service", () => {
         });
     });
 
-    // Tests for getExerciseById
     describe("getExerciseById", () => {
         beforeEach(() => {
             jest.clearAllMocks();
@@ -166,7 +163,6 @@ describe("Exercise Service", () => {
         });
     });
 
-    // Tests for updateExercise
     describe("updateExercise", () => {
         beforeEach(() => {
             jest.clearAllMocks();
@@ -199,7 +195,6 @@ describe("Exercise Service", () => {
         });
     });
 
-    // Tests for deleteExercise
     describe("deleteExercise", () => {
         beforeEach(() => {
             jest.clearAllMocks();
