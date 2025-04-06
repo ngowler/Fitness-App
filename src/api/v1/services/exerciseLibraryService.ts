@@ -30,23 +30,28 @@ export const createExercise = async (exercise: Partial<ExerciseLibrary>): Promis
 
 /**
  * @description Get all exercises.
- * @param {any} queryParams - Query parameters for filtering exercises.
- * @returns {Promise<ExerciseLibrary[]>}
+ * @param {object} queryParams - Query parameters for filtering exercises. 
+ * Optional filters include equipment, musclesWorked, and intensity.
+ * @returns {Promise<ExerciseLibrary[]>} A promise that resolves to a list of exercises matching the filters.
  */
-export const getAllExercises = async (queryParams: any): Promise<ExerciseLibrary[]> => {
+export const getAllExercises = async (queryParams: {
+    equipment?: string[];
+    musclesWorked?: string[];
+    intensity?: "Low" | "Medium" | "High";
+}): Promise<ExerciseLibrary[]> => {
     try {
         const snapshot: FirebaseFirestore.QuerySnapshot = await getDocuments(COLLECTION);
         let exercises = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as ExerciseLibrary[];
 
         if (queryParams.equipment) {
             exercises = exercises.filter((exercise) =>
-                exercise.equipment.some((item) => queryParams.equipment.includes(item))
+                exercise.equipment.some((item) => queryParams.equipment!.includes(item))
             );
         }
 
         if (queryParams.musclesWorked) {
             exercises = exercises.filter((exercise) =>
-                exercise.musclesWorked.some((muscle) => queryParams.musclesWorked.includes(muscle))
+                exercise.musclesWorked.some((muscle) => queryParams.musclesWorked!.includes(muscle))
             );
         }
 
