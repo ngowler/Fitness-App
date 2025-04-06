@@ -29,7 +29,7 @@ describe("Exercise Routes", () => {
                 equipment: ["None"],
                 musclesWorked: ["Chest", "Triceps"],
                 intensity: "Medium",
-                duration: 30,
+                sets: 5,
                 reps: 15,
             };
 
@@ -74,7 +74,7 @@ describe("Exercise Routes", () => {
                 equipment: ["None"],
                 musclesWorked: ["Chest", "Triceps"],
                 intensity: "High",
-                duration: 45,
+                sets: 5,
                 reps: 20,
             };
 
