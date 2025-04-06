@@ -129,3 +129,55 @@ export class CorsError extends Error {
         this.statusCode = statusCode;
     }
 }
+
+/**
+ * Class representing an authentication error.
+ * Extends the built-in Error class to include an error code and status code.
+ */
+export class AuthenticationError extends Error {
+    code: string;
+    statusCode: number;
+
+    /**
+     * Creates a new AuthenticationError instance.
+     * @param {string} message - The error message.
+     * @param {string} code - The error code.
+     * @param {number} statusCode - The HTTP response code.
+     */
+    constructor(
+        message: string,
+        code: string = "AUTHENTICATION_ERROR",
+        statusCode: number = HTTP_STATUS.UNAUTHORIZED
+    ) {
+        super(message);
+        this.name = "AuthenticationError";
+        this.code = code;
+        this.statusCode = statusCode;
+    }
+}
+
+/**
+ * Class representing an authorization error.
+ * Extends the built-in Error class to include an error code and status code.
+ */
+export class AuthorizationError extends Error {
+    code: string;
+    statusCode: number;
+
+    /**
+     * Creates a new AuthorizationError instance.
+     * @param {string} message - The error message.
+     * @param {string} code - The error code.
+     * @param {number} statusCode - The HTTP response code.
+     */
+    constructor(
+        message: string,
+        code: string = "AUTHORIZATION_ERROR",
+        statusCode: number = HTTP_STATUS.FORBIDDEN
+    ) {
+        super(message);
+        this.name = "AuthorizationError";
+        this.code = code;
+        this.statusCode = statusCode;
+    }
+}
