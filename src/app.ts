@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+import errorHandler from "./api/v1/middleware/errorHandler";
+
 import exerciseLibraryRoutes from "./api/v1/routes/exerciseLibraryRoutes"
 import exerciseRoutes from "./api/v1/routes/exerciseRoutes"
 import questionRoutes from "./api/v1/routes/questionRoutes"
@@ -17,5 +19,7 @@ app.use("/api/v1/exercise", exerciseRoutes);
 app.use("/api/v1/question", questionRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/workout", wourkoutRoutes);
+
+app.use(errorHandler);
 
 export default app;
