@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import supertest from "supertest";
 import request from "supertest";
 import app from "../src/app";
 import {
@@ -20,7 +21,7 @@ jest.mock("../src/api/v1/middleware/authenticate", () =>
 
 jest.mock("../src/api/v1/middleware/authorize", () =>
     jest.fn(({ hasRole }: { hasRole: string[] }) =>
-        (req: Request, res: Response, next: NextFunction) => {
+        (req: Request, res: Response, next: NextFunction): void | Response => {
             const userRole = req.headers["x-roles"];
 
             if (Array.isArray(userRole)) {
@@ -56,7 +57,7 @@ jest.mock("../src/api/v1/controllers/exerciseLibraryController", () => ({
 describe("Exercise Library Routes", () => {
     describe("POST /api/v1/exercise-library", () => {
         it("should allow a trainer to create an exercise", async () => {
-            const response = await request(app)
+            const response: supertest.Response = await request(app)
                 .post("/api/v1/exercise-library")
                 .set("authorization", "Bearer token")
                 .set("x-roles", "trainer")
@@ -75,7 +76,7 @@ describe("Exercise Library Routes", () => {
 
     describe("GET /api/v1/exercise-library", () => {
         it("should allow authorized users to get all exercises", async () => {
-            const response = await request(app)
+            const response: supertest.Response = await request(app)
                 .get("/api/v1/exercise-library")
                 .set("authorization", "Bearer token")
                 .set("x-roles", "lite");
@@ -88,7 +89,7 @@ describe("Exercise Library Routes", () => {
 
     describe("GET /api/v1/exercise-library/:id", () => {
         it("should allow authorized users to get an exercise by ID", async () => {
-            const response = await request(app)
+            const response: supertest.Response = await request(app)
                 .get("/api/v1/exercise-library/1")
                 .set("authorization", "Bearer token")
                 .set("x-roles", "premium");
@@ -101,7 +102,7 @@ describe("Exercise Library Routes", () => {
 
     describe("PUT /api/v1/exercise-library/:id", () => {
         it("should allow a trainer to update an exercise", async () => {
-            const response = await request(app)
+            const response: supertest.Response = await request(app)
                 .put("/api/v1/exercise-library/1")
                 .set("authorization", "Bearer token")
                 .set("x-roles", "trainer")
@@ -115,7 +116,7 @@ describe("Exercise Library Routes", () => {
 
     describe("DELETE /api/v1/exercise-library/:id", () => {
         it("should allow a trainer to delete an exercise", async () => {
-            const response = await request(app)
+            const response: supertest.Response = await request(app)
                 .delete("/api/v1/exercise-library/1")
                 .set("authorization", "Bearer token")
                 .set("x-roles", "trainer");

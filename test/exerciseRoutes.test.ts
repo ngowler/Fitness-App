@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import supertest from "supertest";
 import request from "supertest";
 import app from "../src/app";
 import {
@@ -8,9 +9,10 @@ import {
     updateExercise,
     deleteExercise,
 } from "../src/api/v1/controllers/exerciseController";
+import { Exercise } from "../src/api/v1/models/exerciseModel";
 
 jest.mock("../src/api/v1/middleware/authenticate", () =>
-    jest.fn((req: Request, res: Response, next: NextFunction) => {
+    jest.fn((req: Request, res: Response, next: NextFunction): void | Response => {
         if (!req.headers["authorization"]) {
             return res.status(401).json({ error: "Unauthorized" });
         }
@@ -20,7 +22,7 @@ jest.mock("../src/api/v1/middleware/authenticate", () =>
 
 jest.mock("../src/api/v1/middleware/authorize", () =>
     jest.fn(({ hasRole }: { hasRole: string[] }) =>
-        (req: Request, res: Response, next: NextFunction) => {
+        (req: Request, res: Response, next: NextFunction): void | Response => {
             const userRole = req.headers["x-roles"];
 
             if (Array.isArray(userRole)) {
@@ -51,7 +53,7 @@ describe("Exercise Routes", () => {
 
     describe("POST /api/v1/exercise", () => {
         it("should allow authorized users to create an exercise", async () => {
-            const mockExercise = {
+            const mockExercise: Exercise = {
                 workoutId: "workout123",
                 name: "Push-up",
                 equipment: ["None"],
@@ -61,7 +63,7 @@ describe("Exercise Routes", () => {
                 reps: 15,
             };
 
-            const response = await request(app)
+            const response: supertest.Response = await request(app)
                 .post("/api/v1/exercise")
                 .set("authorization", "Bearer token")
                 .set("x-roles", "lite")
@@ -75,7 +77,7 @@ describe("Exercise Routes", () => {
 
     describe("GET /api/v1/exercise", () => {
         it("should allow authorized users to retrieve all exercises", async () => {
-            const response = await request(app)
+            const response: supertest.Response = await request(app)
                 .get("/api/v1/exercise")
                 .set("authorization", "Bearer token")
                 .set("x-roles", "lite")
@@ -89,9 +91,9 @@ describe("Exercise Routes", () => {
 
     describe("GET /api/v1/exercise/:id", () => {
         it("should allow authorized users to retrieve an exercise by ID", async () => {
-            const exerciseId = "exercise123";
+            const exerciseId: string = "exercise123";
 
-            const response = await request(app)
+            const response: supertest.Response = await request(app)
                 .get(`/api/v1/exercise/${exerciseId}`)
                 .set("authorization", "Bearer token")
                 .set("x-roles", "lite");
@@ -104,8 +106,8 @@ describe("Exercise Routes", () => {
 
     describe("PUT /api/v1/exercise/:id", () => {
         it("should allow authorized users to update an exercise", async () => {
-            const exerciseId = "exercise123";
-            const updatedExercise = {
+            const exerciseId: string = "exercise123";
+            const updatedExercise: Partial<Exercise> = {
                 name: "Updated Push-up",
                 equipment: ["None"],
                 musclesWorked: ["Chest", "Triceps"],
@@ -114,7 +116,7 @@ describe("Exercise Routes", () => {
                 reps: 20,
             };
 
-            const response = await request(app)
+            const response: supertest.Response = await request(app)
                 .put(`/api/v1/exercise/${exerciseId}`)
                 .set("authorization", "Bearer token")
                 .set("x-roles", "lite")
@@ -128,9 +130,9 @@ describe("Exercise Routes", () => {
 
     describe("DELETE /api/v1/exercise/:id", () => {
         it("should allow authorized users to delete an exercise", async () => {
-            const exerciseId = "exercise123";
+            const exerciseId: string = "exercise123";
 
-            const response = await request(app)
+            const response: supertest.Response = await request(app)
                 .delete(`/api/v1/exercise/${exerciseId}`)
                 .set("authorization", "Bearer token")
                 .set("x-roles", "lite");

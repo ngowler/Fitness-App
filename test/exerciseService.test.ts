@@ -26,11 +26,11 @@ jest.mock("../src/api/v1/repositories/firestoreRepository", () => ({
 
 describe("Exercise Service", () => {
     describe("createExercise", () => {
-        beforeEach(() => {
+        beforeEach((): void => {
             jest.clearAllMocks();
         });
 
-        it("should create a new exercise and update workout exercises list", async () => {
+        it("should create a new exercise and update workout exercises list", async (): Promise<void> => {
             const mockExerciseData: Partial<Exercise> = {
                 workoutId: "workout123",
                 name: "Push-ups",
@@ -47,11 +47,11 @@ describe("Exercise Service", () => {
             (createDocument as jest.Mock).mockResolvedValue("exercise123");
             (getDocumentById as jest.Mock).mockResolvedValue({
                 exists: true,
-                data: () => mockWorkoutData,
+                data: (): Workout => mockWorkoutData,
             });
             (updateDocument as jest.Mock).mockResolvedValue(undefined);
 
-            const result = await createExercise(mockExerciseData);
+            const result: Exercise = await createExercise(mockExerciseData);
 
             expect(createDocument).toHaveBeenCalledWith("Exercise", mockExerciseData);
             expect(getDocumentById).toHaveBeenCalledWith("Workout", mockExerciseData.workoutId);
@@ -61,7 +61,7 @@ describe("Exercise Service", () => {
             expect(result).toEqual({ id: "exercise123", ...mockExerciseData });
         });
 
-        it("should throw an error if workout ID is missing", async () => {
+        it("should throw an error if workout ID is missing", async (): Promise<void> => {
             const mockExerciseData: Partial<Exercise> = { name: "Push-ups" };
         
             await expect(createExercise(mockExerciseData)).rejects.toThrow(
@@ -76,15 +76,15 @@ describe("Exercise Service", () => {
     });
 
     describe("getAllExercises", () => {
-        beforeEach(() => {
+        beforeEach((): void => {
             jest.clearAllMocks();
         });
 
-        it("should retrieve all exercises", async () => {
-            const mockDocs = [
+        it("should retrieve all exercises", async (): Promise<void> => {
+            const mockDocs: { id: string; data: () => Partial<Exercise> }[] = [
                 {
                     id: "exercise123",
-                    data: () => ({
+                    data: (): Partial<Exercise> => ({
                         workoutId: "workout123",
                         name: "Push-ups",
                     }),
@@ -93,25 +93,25 @@ describe("Exercise Service", () => {
 
             (getDocuments as jest.Mock).mockResolvedValue({ docs: mockDocs });
 
-            const result = await getAllExercises();
+            const result: Partial<Exercise>[] = await getAllExercises();
 
             expect(getDocuments).toHaveBeenCalledWith("exercises");
             expect(result).toHaveLength(1);
             expect(result[0]).toEqual({ id: "exercise123", workoutId: "workout123", name: "Push-ups" });
         });
 
-        it("should filter exercises by workout ID", async () => {
-            const mockDocs = [
+        it("should filter exercises by workout ID", async (): Promise<void> => {
+            const mockDocs: { id: string; data: () => Partial<Exercise> }[] = [
                 {
                     id: "exercise123",
-                    data: () => ({
+                    data: (): Partial<Exercise> => ({
                         workoutId: "workout123",
                         name: "Push-ups",
                     }),
                 },
                 {
                     id: "exercise456",
-                    data: () => ({
+                    data: (): Partial<Exercise> => ({
                         workoutId: "workout456",
                         name: "Squats",
                     }),
@@ -120,7 +120,7 @@ describe("Exercise Service", () => {
 
             (getDocuments as jest.Mock).mockResolvedValue({ docs: mockDocs });
 
-            const result = await getAllExercises("workout123");
+            const result: Partial<Exercise>[] = await getAllExercises("workout123");
 
             expect(result).toHaveLength(1);
             expect(result[0].workoutId).toBe("workout123");
@@ -128,15 +128,15 @@ describe("Exercise Service", () => {
     });
 
     describe("getExerciseById", () => {
-        beforeEach(() => {
+        beforeEach((): void => {
             jest.clearAllMocks();
         });
 
-        it("should retrieve exercise by ID", async () => {
-            const mockDoc = {
+        it("should retrieve exercise by ID", async (): Promise<void> => {
+            const mockDoc: { id: string; exists: boolean; data: () => Partial<Exercise> } = {
                 id: "exercise123",
                 exists: true,
-                data: () => ({
+                data: (): Partial<Exercise> => ({
                     workoutId: "workout123",
                     name: "Push-ups",
                 }),
@@ -144,14 +144,14 @@ describe("Exercise Service", () => {
 
             (getDocumentById as jest.Mock).mockResolvedValue(mockDoc);
 
-            const result = await getExerciseById("exercise123");
+            const result: Partial<Exercise> = await getExerciseById("exercise123");
 
             expect(getDocumentById).toHaveBeenCalledWith("exercises", "exercise123");
             expect(result).toEqual({ id: "exercise123", workoutId: "workout123", name: "Push-ups" });
         });
 
-        it("should handle non-existent exercise", async () => {
-            const mockDoc = { id: "exercise123", exists: false };
+        it("should handle non-existent exercise", async (): Promise<void> => {
+            const mockDoc: { id: string; exists: boolean } = { id: "exercise123", exists: false };
 
             (getDocumentById as jest.Mock).mockResolvedValue(mockDoc);
 
@@ -164,26 +164,26 @@ describe("Exercise Service", () => {
     });
 
     describe("updateExercise", () => {
-        beforeEach(() => {
+        beforeEach((): void => {
             jest.clearAllMocks();
         });
 
-        it("should update an existing exercise", async () => {
-            const id = "exercise123";
+        it("should update an existing exercise", async (): Promise<void> => {
+            const id: string = "exercise123";
             const mockExerciseData: Partial<Exercise> = { name: "Updated Push-ups" };
 
             (updateDocument as jest.Mock).mockResolvedValue(undefined);
 
-            const result = await updateExercise(id, mockExerciseData);
+            const result: Partial<Exercise> = await updateExercise(id, mockExerciseData);
 
             expect(updateDocument).toHaveBeenCalledWith("exercises", id, mockExerciseData);
             expect(result).toEqual({ id, ...mockExerciseData });
         });
 
-        it("should handle update error", async () => {
-            const id = "exercise123";
+        it("should handle update error", async (): Promise<void> => {
+            const id: string = "exercise123";
             const mockExerciseData: Partial<Exercise> = { name: "Updated Push-ups" };
-            const mockError = new Error("Update error");
+            const mockError: Error = new Error("Update error");
 
             (updateDocument as jest.Mock).mockRejectedValue(mockError);
 
@@ -196,12 +196,12 @@ describe("Exercise Service", () => {
     });
 
     describe("deleteExercise", () => {
-        beforeEach(() => {
+        beforeEach((): void => {
             jest.clearAllMocks();
         });
 
-        it("should delete an exercise", async () => {
-            const id = "exercise123";
+        it("should delete an exercise", async (): Promise<void> => {
+            const id: string = "exercise123";
 
             (deleteDocument as jest.Mock).mockResolvedValue(undefined);
 
@@ -210,9 +210,9 @@ describe("Exercise Service", () => {
             expect(deleteDocument).toHaveBeenCalledWith("exercises", id);
         });
 
-        it("should handle delete error", async () => {
-            const id = "exercise123";
-            const mockError = new Error("Delete error");
+        it("should handle delete error", async (): Promise<void> => {
+            const id: string = "exercise123";
+            const mockError: Error = new Error("Delete error");
 
             (deleteDocument as jest.Mock).mockRejectedValue(mockError);
 
