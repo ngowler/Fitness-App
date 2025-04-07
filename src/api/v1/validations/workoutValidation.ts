@@ -32,10 +32,6 @@ export const exerciseSchema: ObjectSchema = Joi.object({
 });
 
 export const postWorkoutSchema: ObjectSchema = Joi.object({
-    userId: Joi.string().required().messages({
-        "any.required": "User ID is required",
-        "string.empty": "User ID cannot be empty",
-    }),
     name: Joi.string().required().messages({
         "any.required": "Workout name is required",
         "string.empty": "Workout name cannot be empty",

@@ -16,7 +16,6 @@ describe("validate function for workouts", () => {
     describe("postWorkoutSchema", () => {
         it("should not throw an error for valid workout data", () => {
             const data: Data = {
-                userId: "1",
                 name: "Morning Workout",
                 description: "A quick workout to start the day",
                 date: "2025-04-06T08:30:00Z",
@@ -36,7 +35,6 @@ describe("validate function for workouts", () => {
 
         it("should throw an error for missing userId", () => {
             const data: Data = {
-                name: "Morning Workout",
                 date: "2025-04-06T08:30:00Z",
                 exercises: [
                     {
@@ -49,7 +47,7 @@ describe("validate function for workouts", () => {
                     },
                 ],
             };
-            expect(() => validate(postWorkoutSchema, data)).toThrow("User ID is required");
+            expect(() => validate(postWorkoutSchema, data)).toThrow("Validation error: Workout name is required");
         });
 
         it("should throw an error for missing exercises", () => {
@@ -133,7 +131,6 @@ describe("validateRequest middleware for workouts", () => {
 
     it("should not throw an error for valid postWorkoutSchema data", () => {
         req.body = {
-            userId: "1",
             name: "Morning Workout",
             date: "2025-04-06T08:30:00Z",
             exercises: [
@@ -157,7 +154,6 @@ describe("validateRequest middleware for workouts", () => {
 
     it("should return 400 for missing userId", () => {
         req.body = {
-            name: "Morning Workout",
             date: "2025-04-06T08:30:00Z",
             exercises: [
                 {
@@ -176,7 +172,7 @@ describe("validateRequest middleware for workouts", () => {
         expect(next).not.toHaveBeenCalled();
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith({
-            error: "Validation error: User ID is required",
+            error: "Validation error: Workout name is required",
         });
     });
 

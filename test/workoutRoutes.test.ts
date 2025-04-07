@@ -53,7 +53,6 @@ describe("Workout Routes", () => {
     describe("POST /api/v1/workout", () => {
         it("should allow authorized users to create a workout", async () => {
             const mockWorkout = {
-                userId: "user123",
                 name: "Strength Training",
                 description: "Full-body workout focusing on strength",
                 date: "2025-04-06",
@@ -87,7 +86,7 @@ describe("Workout Routes", () => {
                 .get("/api/v1/workout")
                 .set("authorization", "Bearer token")
                 .set("x-roles", "trainer")
-                .query({ userId: "user123" }); // Include the required query parameter
+                .query({ userId: "user123" });
 
             expect(response.status).toBe(200);
             expect(response.body.workouts).toEqual(["Workout1", "Workout2"]);

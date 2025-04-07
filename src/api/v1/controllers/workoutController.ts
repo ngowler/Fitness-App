@@ -15,9 +15,11 @@ export const createWorkout = async (
     next: NextFunction
 ): Promise<void> => {
     try {
+        const userId: string = res.locals.uid;
+
         const { workoutData, exerciseLibraryIds } = req.body;
 
-        const newWorkout: Workout = await workoutService.createWorkout(workoutData, exerciseLibraryIds);
+        const newWorkout: Workout = await workoutService.createWorkout(workoutData, userId, exerciseLibraryIds);
 
         res.status(HTTP_STATUS.CREATED).json(
             successResponse(newWorkout, "Workout Created")
@@ -26,7 +28,6 @@ export const createWorkout = async (
         next(error);
     }
 };
-
 
 /**
  * @description Retrieve all workouts for the authenticated user.
