@@ -23,17 +23,17 @@ jest.mock("../src/api/v1/repositories/firestoreRepository", () => ({
 
 describe("Question Service", () => {
     describe("createQuestion", () => {
-        beforeEach(() => {
+        beforeEach((): void => {
             jest.clearAllMocks();
         });
 
-        it("should create a new question", async () => {
+        it("should create a new question", async (): Promise<void> => {
             const mockQuestionData: Partial<Question> = { question: "What is the schedule?" };
-            const mockUserId = "user123";
+            const mockUserId: string = "user123";
 
             (createDocument as jest.Mock).mockResolvedValue("question123");
 
-            const result = await createQuestion(mockQuestionData, mockUserId);
+            const result: Partial<Question> = await createQuestion(mockQuestionData, mockUserId);
 
             expect(createDocument).toHaveBeenCalledWith("questions", {
                 ...mockQuestionData,
@@ -48,7 +48,7 @@ describe("Question Service", () => {
             });
         });
 
-        it("should throw an error if user ID is missing", async () => {
+        it("should throw an error if user ID is missing", async (): Promise<void> => {
             const mockQuestionData: Partial<Question> = { question: "What is the schedule?" };
 
             await expect(createQuestion(mockQuestionData, "")).rejects.toThrow(
@@ -60,25 +60,28 @@ describe("Question Service", () => {
     });
 
     describe("getAllQuestions", () => {
-        beforeEach(() => {
+        beforeEach((): void => {
             jest.clearAllMocks();
         });
 
-        it("should return all questions", async () => {
-            const mockDocs = [
+        it("should return all questions", async (): Promise<void> => {
+            const mockDocs: { id: string; data: () => Partial<Question> }[] = [
                 {
                     id: "question123",
-                    data: () => ({ userId: "user123", question: "What is the schedule?" }),
+                    data: (): Partial<Question> => ({ userId: "user123", question: "What is the schedule?" }),
                 },
                 {
                     id: "question456",
-                    data: () => ({ userId: "user456", question: "Can I reschedule my session?" }),
+                    data: (): Partial<Question> => ({
+                        userId: "user456",
+                        question: "Can I reschedule my session?",
+                    }),
                 },
             ];
 
             (getDocuments as jest.Mock).mockResolvedValue({ docs: mockDocs });
 
-            const result = await getAllQuestions();
+            const result: Partial<Question>[] = await getAllQuestions();
 
             expect(getDocuments).toHaveBeenCalledWith("questions");
             expect(result).toHaveLength(2);
@@ -92,25 +95,28 @@ describe("Question Service", () => {
     });
 
     describe("getAllQuestionsByUserId", () => {
-        beforeEach(() => {
+        beforeEach((): void => {
             jest.clearAllMocks();
         });
 
-        it("should return questions filtered by user ID", async () => {
-            const mockDocs = [
+        it("should return questions filtered by user ID", async (): Promise<void> => {
+            const mockDocs: { id: string; data: () => Partial<Question> }[] = [
                 {
                     id: "question123",
-                    data: () => ({ userId: "user123", question: "What is the schedule?" }),
+                    data: (): Partial<Question> => ({ userId: "user123", question: "What is the schedule?" }),
                 },
                 {
                     id: "question456",
-                    data: () => ({ userId: "user456", question: "Can I reschedule my session?" }),
+                    data: (): Partial<Question> => ({
+                        userId: "user456",
+                        question: "Can I reschedule my session?",
+                    }),
                 },
             ];
 
             (getDocuments as jest.Mock).mockResolvedValue({ docs: mockDocs });
 
-            const result = await getAllQuestionsByUserId("user123");
+            const result: Partial<Question>[] = await getAllQuestionsByUserId("user123");
 
             expect(result).toHaveLength(1);
             expect(result[0]).toEqual({ id: "question123", userId: "user123", question: "What is the schedule?" });
@@ -118,27 +124,27 @@ describe("Question Service", () => {
     });
 
     describe("getQuestionById", () => {
-        beforeEach(() => {
+        beforeEach((): void => {
             jest.clearAllMocks();
         });
 
-        it("should retrieve a question by its ID", async () => {
-            const mockDoc = {
+        it("should retrieve a question by its ID", async (): Promise<void> => {
+            const mockDoc: { id: string; exists: boolean; data: () => Partial<Question> } = {
                 id: "question123",
                 exists: true,
-                data: () => ({ userId: "user123", question: "What is the schedule?" }),
+                data: (): Partial<Question> => ({ userId: "user123", question: "What is the schedule?" }),
             };
 
             (getDocumentById as jest.Mock).mockResolvedValue(mockDoc);
 
-            const result = await getQuestionById("question123");
+            const result: Partial<Question> = await getQuestionById("question123");
 
             expect(getDocumentById).toHaveBeenCalledWith("questions", "question123");
             expect(result).toEqual({ id: "question123", userId: "user123", question: "What is the schedule?" });
         });
 
-        it("should handle non-existent question", async () => {
-            const mockDoc = { id: "question123", exists: false };
+        it("should handle non-existent question", async (): Promise<void> => {
+            const mockDoc: { id: string; exists: boolean } = { id: "question123", exists: false };
 
             (getDocumentById as jest.Mock).mockResolvedValue(mockDoc);
 
@@ -151,18 +157,18 @@ describe("Question Service", () => {
     });
 
     describe("respondToQuestion", () => {
-        beforeEach(() => {
+        beforeEach((): void => {
             jest.clearAllMocks();
         });
 
-        it("should respond to an existing question", async () => {
-            const id = "question123";
+        it("should respond to an existing question", async (): Promise<void> => {
+            const id: string = "question123";
             const mockResponseData: Partial<Question> = { response: "The schedule is as follows..." };
-            const mockTrainerId = "trainer123";
+            const mockTrainerId: string = "trainer123";
 
             (updateDocument as jest.Mock).mockResolvedValue(undefined);
 
-            const result = await respondToQuestion(id, mockResponseData, mockTrainerId);
+            const result: Partial<Question> = await respondToQuestion(id, mockResponseData, mockTrainerId);
 
             expect(updateDocument).toHaveBeenCalledWith("questions", id, {
                 ...mockResponseData,
@@ -177,8 +183,8 @@ describe("Question Service", () => {
             });
         });
 
-        it("should throw an error if trainer ID is missing", async () => {
-            const id = "question123";
+        it("should throw an error if trainer ID is missing", async (): Promise<void> => {
+            const id: string = "question123";
             const mockResponseData: Partial<Question> = { response: "The schedule is as follows..." };
 
             await expect(respondToQuestion(id, mockResponseData, "")).rejects.toThrow(

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import request from "supertest";
+import request, { Response as SupertestResponse } from "supertest";
 import app from "../src/app";
 import {
     createWorkout,
@@ -10,9 +10,10 @@ import {
 } from "../src/api/v1/controllers/workoutController";
 
 jest.mock("../src/api/v1/middleware/authenticate", () =>
-    jest.fn((req, res, next) => {
+    jest.fn((req: Request, res: Response, next: NextFunction): void => {
         if (!req.headers["authorization"]) {
-            return res.status(401).json({ error: "Unauthorized" });
+            res.status(401).json({ error: "Unauthorized" });
+            return;
         }
         next();
     })
@@ -20,39 +21,67 @@ jest.mock("../src/api/v1/middleware/authenticate", () =>
 
 jest.mock("../src/api/v1/middleware/authorize", () =>
     jest.fn(({ hasRole, allowSameUser }: { hasRole: string[]; allowSameUser?: boolean }) =>
-        (req: Request, res: Response, next: NextFunction) => {
-            const userRole = req.headers["x-roles"];
-            const userId = req.headers["x-user-id"];
+        (req: Request, res: Response, next: NextFunction): void => {
+            const userRoleHeader = req.headers["x-roles"];
+            const userId = req.headers["x-user-id"] as string | undefined;
 
-            if (Array.isArray(userRole)) {
-                if (!userRole.some(role => hasRole.includes(role))) {
-                    return res.status(403).json({ error: "Forbidden: Insufficient permissions" });
+            const userRole: string | undefined = Array.isArray(userRoleHeader)
+                ? userRoleHeader.join(", ")
+                : (userRoleHeader as string | undefined);
+
+            if (userRole) {
+                if (!hasRole.includes(userRole)) {
+                    if (!allowSameUser || userId !== req.params.id) {
+                        res.status(403).json({ error: "Forbidden: Insufficient permissions" });
+                        return;
+                    }
                 }
-            } else if (!userRole || !hasRole.includes(userRole)) {
-                if (!allowSameUser || userId !== req.params.id) {
-                    return res.status(403).json({ error: "Forbidden: Insufficient permissions" });
-                }
+            } else {
+                res.status(403).json({ error: "Forbidden: Insufficient permissions" });
+                return;
             }
             next();
         })
 );
 
 jest.mock("../src/api/v1/controllers/workoutController", () => ({
-    createWorkout: jest.fn((req, res) => res.status(201).json({ message: "Workout created successfully" })),
-    getAllWorkouts: jest.fn((req, res) => res.status(200).json({ workouts: ["Workout1", "Workout2"] })),
-    getWorkoutById: jest.fn((req, res) => res.status(200).json({ workout: "Workout1" })),
-    updateWorkout: jest.fn((req, res) => res.status(200).json({ message: "Workout updated successfully" })),
-    deleteWorkout: jest.fn((req, res) => res.status(204).send()),
+    createWorkout: jest.fn((req: Request, res: Response): Response =>
+        res.status(201).json({ message: "Workout created successfully" })
+    ),
+    getAllWorkouts: jest.fn((req: Request, res: Response): Response =>
+        res.status(200).json({ workouts: ["Workout1", "Workout2"] })
+    ),
+    getWorkoutById: jest.fn((req: Request, res: Response): Response =>
+        res.status(200).json({ workout: "Workout1" })
+    ),
+    updateWorkout: jest.fn((req: Request, res: Response): Response =>
+        res.status(200).json({ message: "Workout updated successfully" })
+    ),
+    deleteWorkout: jest.fn((req: Request, res: Response): void => {
+        res.status(204).send();
+    }),
 }));
 
 describe("Workout Routes", () => {
-    afterEach(() => {
+    afterEach((): void => {
         jest.clearAllMocks();
     });
 
     describe("POST /api/v1/workout", () => {
-        it("should allow authorized users to create a workout", async () => {
-            const mockWorkout = {
+        it("should allow authorized users to create a workout", async (): Promise<void> => {
+            const mockWorkout: {
+                name: string;
+                description: string;
+                date: string;
+                exercises: {
+                    name: string;
+                    equipment: string[];
+                    musclesWorked: string[];
+                    intensity: string;
+                    sets: number;
+                    reps: number;
+                }[];
+            } = {
                 name: "Strength Training",
                 description: "Full-body workout focusing on strength",
                 date: "2025-04-06",
@@ -68,7 +97,7 @@ describe("Workout Routes", () => {
                 ],
             };
 
-            const response = await request(app)
+            const response: SupertestResponse = await request(app)
                 .post("/api/v1/workout")
                 .set("authorization", "Bearer token")
                 .set("x-roles", "lite")
@@ -81,8 +110,8 @@ describe("Workout Routes", () => {
     });
 
     describe("GET /api/v1/workout", () => {
-        it("should allow trainers to retrieve all workouts", async () => {
-            const response = await request(app)
+        it("should allow trainers to retrieve all workouts", async (): Promise<void> => {
+            const response: SupertestResponse = await request(app)
                 .get("/api/v1/workout")
                 .set("authorization", "Bearer token")
                 .set("x-roles", "trainer")
@@ -95,10 +124,10 @@ describe("Workout Routes", () => {
     });
 
     describe("GET /api/v1/workout/:id", () => {
-        it("should allow trainers or the same user to retrieve a workout by ID", async () => {
-            const id = "workout123";
+        it("should allow trainers or the same user to retrieve a workout by ID", async (): Promise<void> => {
+            const id: string = "workout123";
 
-            const response = await request(app)
+            const response: SupertestResponse = await request(app)
                 .get(`/api/v1/workout/${id}`)
                 .set("authorization", "Bearer token")
                 .set("x-roles", "trainer");
@@ -110,9 +139,21 @@ describe("Workout Routes", () => {
     });
 
     describe("PUT /api/v1/workout/:id", () => {
-        it("should allow trainers or the same user to update a workout", async () => {
-            const id = "workout123";
-            const updatedWorkout = {
+        it("should allow trainers or the same user to update a workout", async (): Promise<void> => {
+            const id: string = "workout123";
+            const updatedWorkout: {
+                name: string;
+                description: string;
+                date: string;
+                exercises: {
+                    name: string;
+                    equipment: string[];
+                    musclesWorked: string[];
+                    intensity: string;
+                    sets: number;
+                    reps: number;
+                }[];
+            } = {
                 name: "Updated Strength Training",
                 description: "Updated full-body strength workout",
                 date: "2025-04-07",
@@ -128,7 +169,7 @@ describe("Workout Routes", () => {
                 ],
             };
 
-            const response = await request(app)
+            const response: SupertestResponse = await request(app)
                 .put(`/api/v1/workout/${id}`)
                 .set("authorization", "Bearer token")
                 .set("x-roles", "trainer")
@@ -141,10 +182,10 @@ describe("Workout Routes", () => {
     });
 
     describe("DELETE /api/v1/workout/:id", () => {
-        it("should allow trainers or the same user to delete a workout", async () => {
-            const id = "workout123";
+        it("should allow trainers or the same user to delete a workout", async (): Promise<void> => {
+            const id: string = "workout123";
 
-            const response = await request(app)
+            const response: SupertestResponse = await request(app)
                 .delete(`/api/v1/workout/${id}`)
                 .set("authorization", "Bearer token")
                 .set("x-roles", "trainer");

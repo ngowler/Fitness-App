@@ -22,16 +22,16 @@ jest.mock("../src/api/v1/repositories/firestoreRepository", () => ({
 
 describe("User Service", () => {
     describe("createUser", () => {
-        beforeEach(() => {
+        beforeEach((): void => {
             jest.clearAllMocks();
         });
 
-        it("should create a new user", async () => {
+        it("should create a new user", async (): Promise<void> => {
             const mockUserData: Partial<User> = { name: "John Doe", email: "john@example.com" };
 
             (createDocument as jest.Mock).mockResolvedValue("user123");
 
-            const result = await createUser(mockUserData);
+            const result: User = await createUser(mockUserData);
 
             expect(createDocument).toHaveBeenCalledWith("users", mockUserData);
             expect(result).toEqual({
@@ -40,9 +40,9 @@ describe("User Service", () => {
             });
         });
 
-        it("should throw an error if creation fails", async () => {
+        it("should throw an error if creation fails", async (): Promise<void> => {
             const mockUserData: Partial<User> = { name: "John Doe", email: "john@example.com" };
-            const mockError = new Error("Creation failed");
+            const mockError: Error = new Error("Creation failed");
 
             (createDocument as jest.Mock).mockRejectedValue(mockError);
 
@@ -55,20 +55,20 @@ describe("User Service", () => {
     });
 
     describe("getUserById", () => {
-        beforeEach(() => {
+        beforeEach((): void => {
             jest.clearAllMocks();
         });
 
-        it("should retrieve a user by ID", async () => {
-            const mockDoc = {
+        it("should retrieve a user by ID", async (): Promise<void> => {
+            const mockDoc: { id: string; exists: boolean; data: () => Partial<User> } = {
                 id: "user123",
                 exists: true,
-                data: () => ({ name: "John Doe", email: "john@example.com" }),
+                data: (): Partial<User> => ({ name: "John Doe", email: "john@example.com" }),
             };
 
             (getDocumentById as jest.Mock).mockResolvedValue(mockDoc);
 
-            const result = await getUserById("user123");
+            const result: User = await getUserById("user123");
 
             expect(getDocumentById).toHaveBeenCalledWith("users", "user123");
             expect(result).toEqual({
@@ -78,8 +78,8 @@ describe("User Service", () => {
             });
         });
 
-        it("should handle non-existent user", async () => {
-            const mockDoc = { id: "user123", exists: false };
+        it("should handle non-existent user", async (): Promise<void> => {
+            const mockDoc: { id: string; exists: boolean } = { id: "user123", exists: false };
 
             (getDocumentById as jest.Mock).mockResolvedValue(mockDoc);
 
@@ -92,26 +92,26 @@ describe("User Service", () => {
     });
 
     describe("updateUser", () => {
-        beforeEach(() => {
+        beforeEach((): void => {
             jest.clearAllMocks();
         });
 
-        it("should update an existing user", async () => {
-            const id = "user123";
+        it("should update an existing user", async (): Promise<void> => {
+            const id: string = "user123";
             const mockUserData: Partial<User> = { name: "Updated John Doe" };
 
             (updateDocument as jest.Mock).mockResolvedValue(undefined);
 
-            const result = await updateUser(id, mockUserData);
+            const result: User = await updateUser(id, mockUserData);
 
             expect(updateDocument).toHaveBeenCalledWith("users", id, mockUserData);
             expect(result).toEqual({ id, ...mockUserData });
         });
 
-        it("should handle update error", async () => {
-            const id = "user123";
+        it("should handle update error", async (): Promise<void> => {
+            const id: string = "user123";
             const mockUserData: Partial<User> = { name: "Updated John Doe" };
-            const mockError = new Error("Update failed");
+            const mockError: Error = new Error("Update failed");
 
             (updateDocument as jest.Mock).mockRejectedValue(mockError);
 
@@ -124,12 +124,12 @@ describe("User Service", () => {
     });
 
     describe("deleteUser", () => {
-        beforeEach(() => {
+        beforeEach((): void => {
             jest.clearAllMocks();
         });
 
-        it("should delete a user by ID", async () => {
-            const id = "user123";
+        it("should delete a user by ID", async (): Promise<void> => {
+            const id: string = "user123";
 
             (deleteDocument as jest.Mock).mockResolvedValue(undefined);
 
@@ -138,9 +138,9 @@ describe("User Service", () => {
             expect(deleteDocument).toHaveBeenCalledWith("users", id);
         });
 
-        it("should handle delete error", async () => {
-            const id = "user123";
-            const mockError = new Error("Deletion failed");
+        it("should handle delete error", async (): Promise<void> => {
+            const id: string = "user123";
+            const mockError: Error = new Error("Deletion failed");
 
             (deleteDocument as jest.Mock).mockRejectedValue(mockError);
 
