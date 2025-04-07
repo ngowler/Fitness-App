@@ -23,7 +23,7 @@ jest.mock("../src/api/v1/middleware/authenticate", () =>
 jest.mock("../src/api/v1/middleware/authorize", () =>
     jest.fn(({ hasRole }: { hasRole: string[] }) =>
         (req: Request, res: Response, next: NextFunction): void | Response => {
-            const userRole = req.headers["x-roles"];
+            const userRole: string | string[] | undefined = req.headers["x-roles"];
 
             if (Array.isArray(userRole)) {
                 if (!userRole.some(role => hasRole.includes(role))) {
