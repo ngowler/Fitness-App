@@ -1,0 +1,1418 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Fitness App API Documentation",
+    "version": "1.0.0",
+    "description": "This is the API documentation for the Fitness App applciation."
+  },
+  "server": [
+    {
+      "url": "http://localhost:3000/api/v1",
+      "description": "Local Server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "AuthorizationOptions": {
+        "type": "object",
+        "properties": {
+          "hasRole": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "admin",
+                "lite",
+                "premium",
+                "trainer"
+              ]
+            },
+            "description": "List of roles permitted to access the protected resource. The middleware grants access if the authenticated user has any of the specified roles."
+          },
+          "allowSameUser": {
+            "type": "boolean",
+            "description": "When true, allows users to access their own resources regardless of their role. Typically used for routes identifying a specific user resource by ID in the URL parameters. Defaults to false."
+          }
+        }
+      },
+      "ExerciseLibrary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for an exercise (optional)."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the exercise."
+          },
+          "equipment": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A list of equipment required for the exercise."
+          },
+          "musclesWorked": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A list of muscles targeted by the exercise."
+          },
+          "intensity": {
+            "type": "string",
+            "enum": [
+              "Low",
+              "Medium",
+              "High"
+            ],
+            "description": "The intensity level of the exercise."
+          }
+        }
+      },
+      "Exercise": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for an exercise (optional)."
+          },
+          "workoutId": {
+            "type": "string",
+            "description": "The unique identifier for the workout associated with the exercise."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the exercise."
+          },
+          "equipment": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A list of equipment required for the exercise."
+          },
+          "musclesWorked": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A list of muscles targeted by the exercise."
+          },
+          "intensity": {
+            "type": "string",
+            "enum": [
+              "Low",
+              "Medium",
+              "High"
+            ],
+            "description": "The intensity level of the exercise."
+          },
+          "sets": {
+            "type": "number",
+            "description": "The number of sets for the exercise (optional)."
+          },
+          "reps": {
+            "type": "number",
+            "description": "The number of repetitions per set for the exercise (optional)."
+          }
+        }
+      },
+      "Question": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for the question (optional)."
+          },
+          "userId": {
+            "type": "string",
+            "description": "The unique identifier for the user who asked the question."
+          },
+          "trainerId": {
+            "type": "string",
+            "description": "The unique identifier for the trainer who responded to the question (optional)."
+          },
+          "question": {
+            "type": "string",
+            "description": "The content of the question asked by the user."
+          },
+          "response": {
+            "type": "string",
+            "description": "The content of the response provided by the trainer (optional)."
+          },
+          "dateAsked": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the question was asked."
+          },
+          "dateResponded": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the trainer responded to the question (optional)."
+          }
+        }
+      },
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Indicates whether the operation was successful ('success' or 'error')"
+          },
+          "data": {
+            "type": "object",
+            "nullable": true,
+            "description": "Optional payload returned upon a successful operation"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true,
+            "description": "Informational message about the operation result"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true,
+            "description": "Error message, provided in case of a failure"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optional error code for client-side error handling"
+          }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Indicates if the operation was successful ('success')"
+          },
+          "data": {
+            "type": "object",
+            "nullable": true,
+            "description": "Optional payload returned on successful operations"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optional success message"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Indicates that the operation failed ('error')"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message describing what went wrong"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true,
+            "description": "Optional error code for client-side error handling"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for the user (optional)."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the user."
+          },
+          "email": {
+            "type": "string",
+            "description": "The email address of the user."
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "Lite",
+              "Premium",
+              "Trainer",
+              "Admin"
+            ],
+            "description": "The role of the user in the system."
+          },
+          "healthMetrics": {
+            "type": "object",
+            "properties": {
+              "weight": {
+                "type": "number",
+                "description": "The weight of the user in kilograms."
+              },
+              "height": {
+                "type": "number",
+                "description": "The height of the user in centimeters."
+              },
+              "bodyFatPercentage": {
+                "type": "number",
+                "description": "The body fat percentage of the user (optional)."
+              },
+              "injuriesOrLimitations": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "A list of injuries or limitations the user has (optional)."
+              }
+            },
+            "description": "The health metrics of the user."
+          },
+          "workoutPreferences": {
+            "type": "object",
+            "properties": {
+              "daysAvailable": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "The days the user is available for workouts."
+              },
+              "timePerDay": {
+                "type": "number",
+                "description": "The amount of time (in minutes) the user can dedicate to workouts each day."
+              },
+              "gymAccess": {
+                "type": "boolean",
+                "description": "Whether the user has access to a gym."
+              },
+              "equipment": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "A list of equipment available to the user (optional)."
+              }
+            },
+            "description": "The user's workout preferences."
+          },
+          "background": {
+            "type": "object",
+            "properties": {
+              "experience": {
+                "type": "string",
+                "description": "The user's fitness experience."
+              },
+              "routine": {
+                "type": "string",
+                "description": "The user's current fitness routine."
+              },
+              "goals": {
+                "type": "string",
+                "description": "The fitness goals of the user."
+              }
+            },
+            "description": "The background information of the user."
+          }
+        }
+      },
+      "Workout": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The unique identifier for the workout (optional)."
+          },
+          "userId": {
+            "type": "string",
+            "description": "The unique identifier for the user associated with the workout."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the workout."
+          },
+          "description": {
+            "type": "string",
+            "description": "A brief description of the workout (optional)."
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time of the workout."
+          },
+          "exercises": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Exercise"
+            },
+            "description": "A list of exercises included in the workout."
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/setCustomClaims": {
+      "post": {
+        "summary": "Set custom claims for a user",
+        "tags": [
+          "Claims"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "claims": {
+                    "type": "object",
+                    "description": "An object containing custom claims to set for the user.",
+                    "example": {
+                      "role": "admin",
+                      "permissions": [
+                        "read",
+                        "write"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Custom claims set successfully"
+          },
+          "400": {
+            "description": "Invalid request payload"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/exercise-library": {
+      "post": {
+        "summary": "Create new exercises",
+        "tags": [
+          "ExerciseLibrary"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExerciseLibrary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Exercise created successfully"
+          },
+          "400": {
+            "description": "Invalid input provided"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all exercises",
+        "tags": [
+          "ExerciseLibrary"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtering criteria for the exercises"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exercises retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExerciseLibrary"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/exercise-library/{id}": {
+      "get": {
+        "summary": "Get specific exercise",
+        "tags": [
+          "ExerciseLibrary"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the exercise to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exercise retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExerciseLibrary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "404": {
+            "description": "Exercise not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update specific exercise",
+        "tags": [
+          "ExerciseLibrary"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the exercise to update"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExerciseLibrary"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Exercise updated successfully"
+          },
+          "400": {
+            "description": "Invalid input provided"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "404": {
+            "description": "Exercise not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete specific exercise",
+        "tags": [
+          "ExerciseLibrary"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the exercise to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exercise deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "404": {
+            "description": "Exercise not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/exercise": {
+      "post": {
+        "summary": "Create a new exercise",
+        "tags": [
+          "Exercise"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Exercise"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Exercise created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Exercise"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input provided"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all exercises",
+        "tags": [
+          "Exercise"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "workoutId",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter exercises by workout ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exercises retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Exercise"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/exercise/{id}": {
+      "get": {
+        "summary": "Get a specific exercise",
+        "tags": [
+          "Exercise"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the exercise to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exercise retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Exercise"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "404": {
+            "description": "Exercise not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update an exercise",
+        "tags": [
+          "Exercise"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the exercise to update"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Exercise"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Exercise updated successfully"
+          },
+          "400": {
+            "description": "Invalid input provided"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "404": {
+            "description": "Exercise not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete an exercise",
+        "tags": [
+          "Exercise"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the exercise to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exercise deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "404": {
+            "description": "Exercise not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/question": {
+      "post": {
+        "summary": "Submit a new question",
+        "tags": [
+          "Question"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Question"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Question submitted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Question"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input provided"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all questions",
+        "tags": [
+          "Question"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Questions retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Question"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "404": {
+            "description": "No questions found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/question/{id}": {
+      "get": {
+        "summary": "Get a specific question",
+        "tags": [
+          "Question"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the question to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Question retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Question"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "404": {
+            "description": "Question not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "put": {
+        "summary": "Respond to a question",
+        "tags": [
+          "Question"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the question to respond to"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Question"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Response submitted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Question"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid response payload"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "404": {
+            "description": "Question not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/user": {
+      "post": {
+        "summary": "Create a new user",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input provided"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/user/{id}": {
+      "get": {
+        "summary": "Get user details",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the user to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update user information",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the user to update"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input provided"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a user",
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the user to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/workout": {
+      "post": {
+        "summary": "Create a new workout",
+        "tags": [
+          "Workout"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Workout"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Workout created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Workout"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input provided"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get all workouts",
+        "tags": [
+          "Workout"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Workouts retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Workout"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "404": {
+            "description": "No workouts found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/workout/{id}": {
+      "get": {
+        "summary": "Get a specific workout",
+        "tags": [
+          "Workout"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the workout to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Workout retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Workout"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "404": {
+            "description": "Workout not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a workout",
+        "tags": [
+          "Workout"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the workout to update"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Workout"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Workout updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Workout"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input provided"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "404": {
+            "description": "Workout not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a workout",
+        "tags": [
+          "Workout"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the workout to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Workout deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "404": {
+            "description": "Workout not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    }
+  },
+  "tags": []
+}

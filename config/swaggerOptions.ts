@@ -7,10 +7,10 @@ const swaggerOptions: swaggerJsDoc.Options = {
     definition: {
         openapi: "3.0.0",
         info: {
-            title: "Employee Directory and Branch Management API Documentation",
+            title: "Fitness App API Documentation",
             version: "1.0.0",
             description:
-                "This is the API documentation for the Employee Directory and Branch Management applciation.",
+                "This is the API documentation for the Fitness App applciation.",
         },
         server: [
             {
