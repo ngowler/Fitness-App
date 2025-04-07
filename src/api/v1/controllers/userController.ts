@@ -3,7 +3,6 @@ import * as userService from "../services/userService";
 import { User } from "../models/userModel";
 import { successResponse } from "../models/responseModel";
 import { HTTP_STATUS } from "../../../constants/httpConstants";
-import { auth } from "../../../../config/firebaseConfig";
 
 /**
  * @description Create a new user.

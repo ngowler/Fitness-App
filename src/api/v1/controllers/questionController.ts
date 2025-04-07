@@ -18,13 +18,13 @@ export const createQuestion = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const currentUserId = res.locals.uid;
+        const currentUserId: string = res.locals.uid;
 
         if (!currentUserId) {
             throw new Error("User ID is required to submit a question.");
         }
 
-        const newQuestion = await questionService.createQuestion(req.body, currentUserId);
+        const newQuestion: Question = await questionService.createQuestion(req.body, currentUserId);
 
         res.status(HTTP_STATUS.CREATED).json(
             successResponse(newQuestion, "Question Submitted")
@@ -116,7 +116,7 @@ export const respondToQuestion = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const currentTrainerId = res.locals.uid;
+        const currentTrainerId: string = res.locals.uid;
 
         if (!currentTrainerId) {
             throw new Error("Trainer ID is required to respond to a question.");

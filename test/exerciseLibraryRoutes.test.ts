@@ -10,7 +10,7 @@ import {
 } from "../src/api/v1/controllers/exerciseLibraryController";
 
 jest.mock("../src/api/v1/middleware/authenticate", () =>
-    jest.fn((req: Request, res: Response, next: NextFunction) => {
+    jest.fn((req: Request, res: Response, next: NextFunction): void | Response => {
         if (!req.headers["authorization"]) {
             return res.status(401).json({ error: "Unauthorized" });
         }

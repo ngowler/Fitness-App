@@ -40,7 +40,7 @@ export const getAllWorkouts = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const userId = res.locals.uid;
+        const userId: string = res.locals.uid;
 
         if (!userId) {
             res.status(400).json({ message: "User ID is missing" });

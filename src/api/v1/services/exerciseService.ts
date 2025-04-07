@@ -26,7 +26,7 @@ export const createExercise = async (exerciseData: Partial<Exercise>): Promise<E
         const id: string = await createDocument("Exercise", exerciseData);
         const newExercise: Exercise = { id, ...exerciseData } as Exercise;
 
-        const workoutSnapshot = await getDocumentById("Workout", exerciseData.workoutId);
+        const workoutSnapshot: FirebaseFirestore.DocumentSnapshot = await getDocumentById("Workout", exerciseData.workoutId);
         if (!workoutSnapshot.exists) {
             throw new Error(`Workout with ID ${exerciseData.workoutId} not found`);
         }
@@ -52,8 +52,8 @@ export const createExercise = async (exerciseData: Partial<Exercise>): Promise<E
  */
 export const getAllExercises = async (workoutId?: string): Promise<Exercise[]> => {
     try {
-        const snapshot = await getDocuments(COLLECTION);
-        const exercises = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Exercise[];
+        const snapshot: FirebaseFirestore.QuerySnapshot = await getDocuments(COLLECTION);
+        const exercises: Exercise[] = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Exercise[];
 
         if (workoutId) {
             return exercises.filter((exercise) => exercise.workoutId === workoutId);
@@ -75,7 +75,7 @@ export const getAllExercises = async (workoutId?: string): Promise<Exercise[]> =
  */
 export const getExerciseById = async (id: string): Promise<Exercise> => {
     try {
-        const doc = await getDocumentById(COLLECTION, id);
+        const doc: FirebaseFirestore.DocumentSnapshot = await getDocumentById(COLLECTION, id);
 
         if (!doc.exists) {
             throw new Error(`Exercise with ID ${id} not found.`);

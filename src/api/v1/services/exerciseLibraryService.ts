@@ -18,7 +18,7 @@ const COLLECTION: string = "exercises";
  */
 export const createExercise = async (exercise: Partial<ExerciseLibrary>): Promise<ExerciseLibrary> => {
     try {
-        const id = await createDocument(COLLECTION, exercise);
+        const id: string = await createDocument(COLLECTION, exercise);
         return { id, ...exercise } as ExerciseLibrary;
     } catch (error: unknown) {
         throw new ServiceError(
@@ -41,7 +41,7 @@ export const getAllExercises = async (queryParams: {
 }): Promise<ExerciseLibrary[]> => {
     try {
         const snapshot: FirebaseFirestore.QuerySnapshot = await getDocuments(COLLECTION);
-        let exercises = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as ExerciseLibrary[];
+        let exercises: ExerciseLibrary[] = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as ExerciseLibrary[];
 
         if (queryParams.equipment) {
             exercises = exercises.filter((exercise) =>
@@ -76,7 +76,7 @@ export const getAllExercises = async (queryParams: {
  */
 export const getExerciseById = async (id: string): Promise<ExerciseLibrary> => {
     try {
-        const doc = await getDocumentById(COLLECTION, id);
+        const doc: FirebaseFirestore.DocumentSnapshot = await getDocumentById(COLLECTION, id);
 
         if (!doc.exists) {
             throw new Error(`Failed to retrieve data for document with ID ${id}`);

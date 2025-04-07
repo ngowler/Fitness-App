@@ -44,8 +44,8 @@ export const createWorkout = async (
         });
 
         const selectedExercises: Exercise[] = [];
-        const shuffledExercises = allExercises.sort(() => 0.5 - Math.random());
-        for (let i = 0; i < Math.min(numberOfExercises, shuffledExercises.length); i++) {
+        const shuffledExercises: Exercise[] = allExercises.sort(() => 0.5 - Math.random());
+        for (let i: number = 0; i < Math.min(numberOfExercises, shuffledExercises.length); i++) {
             selectedExercises.push(shuffledExercises[i]);
         }
 
@@ -78,8 +78,8 @@ export const createWorkout = async (
  */
 export const getAllWorkoutsByUserId = async (userId: string): Promise<Workout[]> => {
     try {
-        const snapshot = await getDocuments(COLLECTION);
-        const workouts = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Workout[];
+        const snapshot: FirebaseFirestore.QuerySnapshot = await getDocuments(COLLECTION);
+        const workouts: Workout[] = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Workout[];
         return workouts.filter((workout) => workout.userId === userId);
     } catch (error: unknown) {
         throw new ServiceError(
@@ -96,7 +96,7 @@ export const getAllWorkoutsByUserId = async (userId: string): Promise<Workout[]>
  */
 export const getWorkoutById = async (id: string): Promise<Workout> => {
     try {
-        const doc = await getDocumentById(COLLECTION, id);
+        const doc: FirebaseFirestore.DocumentSnapshot = await getDocumentById(COLLECTION, id);
 
         if (!doc.exists) {
             throw new Error(`Workout with ID ${id} not found.`);

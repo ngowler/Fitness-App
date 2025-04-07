@@ -9,7 +9,6 @@ import express, { Router } from "express";
 import { setCustomClaims } from "../controllers/adminController";
 import authenticate from "../middleware/authenticate";
 import isAuthorized from "../middleware/authorize";
-import { validateRequest } from "../middleware/validate";
 
 const router: Router = express.Router();
 

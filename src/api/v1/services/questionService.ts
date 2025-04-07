@@ -22,10 +22,10 @@ export const createQuestion = async (questionData: Partial<Question>, currentUse
             throw new Error("User ID is required to submit a question.");
         }
 
-        const dateAsked = new Date().toISOString();
-        const completeQuestionData = { ...questionData, userId: currentUserId, dateAsked };
+        const dateAsked: string = new Date().toISOString();
+        const completeQuestionData: Partial<Question> = { ...questionData, userId: currentUserId, dateAsked };
 
-        const id = await createDocument(COLLECTION, completeQuestionData);
+        const id: string = await createDocument(COLLECTION, completeQuestionData);
         return { id, ...completeQuestionData } as Question;
     } catch (error: unknown) {
         throw new ServiceError(
@@ -41,7 +41,7 @@ export const createQuestion = async (questionData: Partial<Question>, currentUse
  */
 export const getAllQuestions = async (): Promise<Question[]> => {
     try {
-        const snapshot = await getDocuments(COLLECTION);
+        const snapshot: FirebaseFirestore.QuerySnapshot = await getDocuments(COLLECTION);
         return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Question[];
     } catch (error: unknown) {
         throw new ServiceError(
@@ -58,8 +58,8 @@ export const getAllQuestions = async (): Promise<Question[]> => {
  */
 export const getAllQuestionsByUserId = async (userId: string): Promise<Question[]> => {
     try {
-        const snapshot = await getDocuments(COLLECTION);
-        const questions = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Question[];
+        const snapshot: FirebaseFirestore.QuerySnapshot = await getDocuments(COLLECTION);
+        const questions: Question[] = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Question[];
         return questions.filter((question) => question.userId === userId);
     } catch (error: unknown) {
         throw new ServiceError(
@@ -76,7 +76,7 @@ export const getAllQuestionsByUserId = async (userId: string): Promise<Question[
  */
 export const getQuestionById = async (id: string): Promise<Question> => {
     try {
-        const doc = await getDocumentById(COLLECTION, id);
+        const doc: FirebaseFirestore.DocumentSnapshot = await getDocumentById(COLLECTION, id);
 
         if (!doc.exists) {
             throw new Error(`Question with ID ${id} not found.`);
@@ -108,8 +108,8 @@ export const respondToQuestion = async (
             throw new Error("Trainer ID is required to respond to a question.");
         }
 
-        const dateResponded = new Date().toISOString();
-        const updatedData = { ...responseData, trainerId: currentTrainerId, dateResponded };
+        const dateResponded: string = new Date().toISOString();
+        const updatedData: Partial<Question> = { ...responseData, trainerId: currentTrainerId, dateResponded };
 
         await updateDocument(COLLECTION, id, updatedData);
 

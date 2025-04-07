@@ -17,7 +17,7 @@ const COLLECTION: string = "users";
  */
 export const createUser = async (userData: Partial<User>): Promise<User> => {
     try {
-        const id = await createDocument(COLLECTION, userData);
+        const id: string = await createDocument(COLLECTION, userData);
         return { id, ...userData } as User;
     } catch (error: unknown) {
         throw new ServiceError(
@@ -34,7 +34,7 @@ export const createUser = async (userData: Partial<User>): Promise<User> => {
  */
 export const getUserById = async (id: string): Promise<User> => {
     try {
-        const doc = await getDocumentById(COLLECTION, id);
+        const doc: FirebaseFirestore.DocumentSnapshot = await getDocumentById(COLLECTION, id);
 
         if (!doc.exists) {
             throw new Error(`User with ID ${id} not found.`);
