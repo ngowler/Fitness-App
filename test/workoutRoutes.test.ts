@@ -22,8 +22,8 @@ jest.mock("../src/api/v1/middleware/authenticate", () =>
 jest.mock("../src/api/v1/middleware/authorize", () =>
     jest.fn(({ hasRole, allowSameUser }: { hasRole: string[]; allowSameUser?: boolean }) =>
         (req: Request, res: Response, next: NextFunction): void => {
-            const userRoleHeader = req.headers["x-roles"];
-            const userId = req.headers["x-user-id"] as string | undefined;
+            const userRoleHeader: string | string[] | undefined = req.headers["x-roles"];
+            const userId: string | undefined = req.headers["x-user-id"] as string | undefined;
 
             const userRole: string | undefined = Array.isArray(userRoleHeader)
                 ? userRoleHeader.join(", ")
