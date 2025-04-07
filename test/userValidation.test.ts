@@ -5,7 +5,6 @@ import {
     getUserByIdSchema,
     putUserSchema,
     deleteUserSchema,
-    upgradeUserRoleSchema,
 } from "../src/api/v1/validations/userValidation";
 
 describe("validate function for users", () => {
@@ -96,33 +95,6 @@ describe("validate function for users", () => {
             expect(() => validate(deleteUserSchema, data)).toThrow("User ID is required");
         });
     });
-
-    describe("upgradeUserRoleSchema", () => {
-        it("should not throw an error for valid role upgrade data", () => {
-            const data: Data = {
-                id: "1",
-                role: "Trainer",
-            };
-            expect(() => validate(upgradeUserRoleSchema, data)).not.toThrow();
-        });
-
-        it("should throw an error for missing role", () => {
-            const data: Data = {
-                id: "1",
-            };
-            expect(() => validate(upgradeUserRoleSchema, data)).toThrow("Role is required");
-        });
-
-        it("should throw an error for invalid role", () => {
-            const data: Data = {
-                id: "1",
-                role: "Guest",
-            };
-            expect(() => validate(upgradeUserRoleSchema, data)).toThrow(
-                "Role must be one of 'Lite', 'Premium', 'Trainer', or 'Admin'"
-            );
-        });
-    });
 });
 
 describe("validateRequest middleware for users", () => {
@@ -169,34 +141,6 @@ describe("validateRequest middleware for users", () => {
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith({
             error: "Validation error: Name is required",
-        });
-    });
-
-    it("should not throw an error for valid upgradeUserRoleSchema data", () => {
-        req.body = {
-            id: "1",
-            role: "Trainer",
-        };
-
-        validateRequest(upgradeUserRoleSchema)(req as Request, res as Response, next);
-
-        expect(next).toHaveBeenCalled();
-        expect(res.status).not.toHaveBeenCalled();
-        expect(res.json).not.toHaveBeenCalled();
-    });
-
-    it("should return 400 for invalid role", () => {
-        req.body = {
-            id: "1",
-            role: "Guest",
-        };
-
-        validateRequest(upgradeUserRoleSchema)(req as Request, res as Response, next);
-
-        expect(next).not.toHaveBeenCalled();
-        expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith({
-            error: "Validation error: Role must be one of 'Lite', 'Premium', 'Trainer', or 'Admin'",
         });
     });
 });

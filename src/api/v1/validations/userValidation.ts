@@ -106,17 +106,3 @@ export const deleteUserSchema: ObjectSchema = Joi.object({
         "string.empty": "User ID cannot be empty",
     }),
 });
-
-export const upgradeUserRoleSchema: ObjectSchema = Joi.object({
-    id: Joi.string().required().messages({
-        "any.required": "User ID is required",
-        "string.empty": "User ID cannot be empty",
-    }),
-    role: Joi.string()
-        .valid("Lite", "Premium", "Trainer", "Admin")
-        .required()
-        .messages({
-            "any.required": "Role is required",
-            "any.only": "Role must be one of 'Lite', 'Premium', 'Trainer', or 'Admin'",
-        }),
-});
