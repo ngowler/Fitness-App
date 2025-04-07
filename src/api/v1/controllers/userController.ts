@@ -91,25 +91,3 @@ export const deleteUser = async (
         next(error);
     }
 };
-
-/**
- * @description Upgrade a user's role.
- * @route POST /user/:id/upgrade
- * @returns {Promise<void>}
- */
-export const setCustomClaims = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-): Promise<void> => {
-    const { uid, claims } = req.body;
-
-    try {
-        await auth.setCustomUserClaims(uid, claims);
-        res.status(HTTP_STATUS.OK).send(
-            successResponse({}, `Custom claims set for user: ${uid}`)
-        );
-    } catch (error: unknown) {
-        next(error);
-    }
-};

@@ -1,31 +1,56 @@
 import express, { Router } from "express";
+import authenticate from "../middleware/authenticate";
+import isAuthorized from "../middleware/authorize";
 import {
     createUser,
     getUserById,
     updateUser,
     deleteUser,
-    setCustomClaims,
-    } from "../controllers/userController"
+} from "../controllers/userController";
 import { validateRequest } from "../middleware/validate";
 import {
     postUserSchema,
     getUserByIdSchema,
     putUserSchema,
     deleteUserSchema,
-    upgradeUserRoleSchema,
 } from "../validations/userValidation";
 
 const router: Router = express.Router();
 
 // Create a new user
-router.post("/", validateRequest(postUserSchema), createUser);
+router.post(
+    "/",
+    authenticate,
+    isAuthorized({ hasRole: ["admin"] }),
+    validateRequest(postUserSchema),
+    createUser
+);
+
 // Retrieve user details by ID
-router.get("/:id", validateRequest(getUserByIdSchema), getUserById);
+router.get(
+    "/:id",
+    authenticate,
+    isAuthorized({ hasRole: ["admin"], allowSameUser: true }),
+    validateRequest(getUserByIdSchema),
+    getUserById
+);
+
 // Update user information
-router.put("/:id", validateRequest(putUserSchema), updateUser);
+router.put(
+    "/:id",
+    authenticate,
+    isAuthorized({ hasRole: ["admin"], allowSameUser: true }),
+    validateRequest(putUserSchema),
+    updateUser
+);
+
 // Delete a user
-router.delete("/:id", validateRequest(deleteUserSchema), deleteUser);
-// Upgrade a user's role (admin)
-router.post("/:id/upgrade", validateRequest(upgradeUserRoleSchema), setCustomClaims);
+router.delete(
+    "/:id",
+    authenticate,
+    isAuthorized({ hasRole: ["admin"], allowSameUser: true }),
+    validateRequest(deleteUserSchema),
+    deleteUser
+);
 
 export default router;

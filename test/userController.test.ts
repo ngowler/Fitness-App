@@ -3,8 +3,6 @@ import * as userController from "../src/api/v1/controllers/userController";
 import * as userService from "../src/api/v1/services/userService";
 import { User } from "../src/api/v1/models/userModel";
 import { HTTP_STATUS } from "../src/constants/httpConstants";
-import request from "supertest";
-import app from "../src/app";
 
 jest.mock("../src/api/v1/services/userService");
 
@@ -125,54 +123,3 @@ describe("User Controller", () => {
         });
     });
 });
-/*
-describe("/api/v1/admin/setCustomClaims Route", () => {
-    it("should allow access for an admin user and call the controller", async () => {
-        const mockResponse = { message: "Claims set successfully" };
-        (userController.setCustomClaims as jest.Mock).mockResolvedValue(mockResponse);
-
-        const response = await request(app)
-            .post("/api/v1/admin/setCustomClaims")
-            .set("authorization", "Bearer token")
-            .set("x-roles", "admin")
-            .send({ uid: "123", claims: { role: "admin" } });
-
-        expect(response.status).toBe(200);
-        expect(response.body.message).toBe("Claims set successfully");
-        expect(userController.setCustomClaims).toHaveBeenCalledTimes(1);
-    });
-
-    it("should deny access if user lacks the admin role", async () => {
-        const response = await request(app)
-            .post("/api/v1/admin/setCustomClaims")
-            .set("authorization", "Bearer token")
-            .set("x-roles", "user")
-            .send({ uid: "123", claims: { role: "user" } });
-
-        expect(response.status).toBe(403);
-        expect(response.body.error).toBe("Forbidden: Insufficient permissions");
-        expect(userController.setCustomClaims).not.toHaveBeenCalled();
-    });
-
-    it("should return an error if authentication fails", async () => {
-        const response = await request(app)
-            .post("/api/v1/admin/setCustomClaims")
-            .set("x-roles", "admin")
-            .send({ uid: "123", claims: { role: "admin" } });
-
-        expect(response.status).toBe(401);
-        expect(response.body.error).toBe("Unauthorized");
-        expect(userController.setCustomClaims).not.toHaveBeenCalled();
-    });
-
-    it("should return an error if both authorization and roles headers are missing", async () => {
-        const response = await request(app)
-            .post("/api/v1/admin/setCustomClaims")
-            .send({ uid: "123", claims: { role: "user" } });
-
-        expect(response.status).toBe(401);
-        expect(response.body.error).toBe("Unauthorized");
-        expect(userController.setCustomClaims).not.toHaveBeenCalled();
-    });
-});
-*/
