@@ -19,7 +19,37 @@ import {
 
 const router: Router = express.Router();
 
-// Create a new exercise for a workout
+/**
+ * @route POST /exercise
+ * @description Create a new exercise for a workout.
+ * 
+ * @openapi
+ * /exercise:
+ *   post:
+ *     summary: Create a new exercise
+ *     tags: [Exercise]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Exercise'
+ *     responses:
+ *       201:
+ *         description: Exercise created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Exercise'
+ *       400:
+ *         description: Invalid input provided
+ *       401:
+ *         description: Unauthorized access
+ *       500:
+ *         description: Server error
+ */
 router.post(
     "/",
     authenticate,
@@ -28,7 +58,37 @@ router.post(
     createExercise
 );
 
-// Retrieve all exercises for a specific workout (implement query param ?workoutId=)
+/**
+ * @route GET /exercise
+ * @description Retrieve all exercises for a specific workout.
+ * 
+ * @openapi
+ * /exercise:
+ *   get:
+ *     summary: Get all exercises
+ *     tags: [Exercise]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: workoutId
+ *         schema:
+ *           type: string
+ *         description: Filter exercises by workout ID
+ *     responses:
+ *       200:
+ *         description: Exercises retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Exercise'
+ *       401:
+ *         description: Unauthorized access
+ *       500:
+ *         description: Server error
+ */
 router.get(
     "/",
     authenticate,
@@ -37,7 +97,38 @@ router.get(
     getAllExercises
 );
 
-// Retrieve a specific exercise by ID
+/**
+ * @route GET /exercise/{id}
+ * @description Retrieve details of a specific exercise by ID.
+ * 
+ * @openapi
+ * /exercise/{id}:
+ *   get:
+ *     summary: Get a specific exercise
+ *     tags: [Exercise]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the exercise to retrieve
+ *     responses:
+ *       200:
+ *         description: Exercise retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Exercise'
+ *       404:
+ *         description: Exercise not found
+ *       401:
+ *         description: Unauthorized access
+ *       500:
+ *         description: Server error
+ */
 router.get(
     "/:id",
     authenticate,
@@ -46,7 +137,42 @@ router.get(
     getExerciseById
 );
 
-// Update an exercise from a workout
+/**
+ * @route PUT /exercise/{id}
+ * @description Update an exercise for a workout.
+ * 
+ * @openapi
+ * /exercise/{id}:
+ *   put:
+ *     summary: Update an exercise
+ *     tags: [Exercise]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the exercise to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Exercise'
+ *     responses:
+ *       200:
+ *         description: Exercise updated successfully
+ *       400:
+ *         description: Invalid input provided
+ *       404:
+ *         description: Exercise not found
+ *       401:
+ *         description: Unauthorized access
+ *       500:
+ *         description: Server error
+ */
 router.put(
     "/:id",
     authenticate,
@@ -55,7 +181,34 @@ router.put(
     updateExercise
 );
 
-// Remove an exercise from a workout
+/**
+ * @route DELETE /exercise/{id}
+ * @description Remove an exercise from a workout.
+ * 
+ * @openapi
+ * /exercise/{id}:
+ *   delete:
+ *     summary: Delete an exercise
+ *     tags: [Exercise]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the exercise to delete
+ *     responses:
+ *       200:
+ *         description: Exercise deleted successfully
+ *       404:
+ *         description: Exercise not found
+ *       401:
+ *         description: Unauthorized access
+ *       500:
+ *         description: Server error
+ */
 router.delete(
     "/:id",
     authenticate,

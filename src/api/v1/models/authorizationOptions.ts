@@ -1,7 +1,26 @@
 /**
- * Configuration options for the isAuthorized middleware
- *
  * @interface AuthorizationOptions
+ * @description Configuration options for the isAuthorized middleware.
+ * 
+ * @openapi
+ * components:
+ *   schemas:
+ *     AuthorizationOptions:
+ *       type: object
+ *       properties:
+ *         hasRole:
+ *           type: array
+ *           items:
+ *             type: string
+ *             enum:
+ *               - admin
+ *               - lite
+ *               - premium
+ *               - trainer
+ *           description: List of roles permitted to access the protected resource. The middleware grants access if the authenticated user has any of the specified roles.
+ *         allowSameUser:
+ *           type: boolean
+ *           description: When true, allows users to access their own resources regardless of their role. Typically used for routes identifying a specific user resource by ID in the URL parameters. Defaults to false.
  */
 export interface AuthorizationOptions {
     /**
