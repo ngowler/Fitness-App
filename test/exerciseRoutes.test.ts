@@ -1,3 +1,4 @@
+import { Request, Response, NextFunction } from "express";
 import request from "supertest";
 import app from "../src/app";
 import {
@@ -8,11 +9,38 @@ import {
     deleteExercise,
 } from "../src/api/v1/controllers/exerciseController";
 
+jest.mock("../src/api/v1/middleware/authenticate", () =>
+    jest.fn((req: Request, res: Response, next: NextFunction) => {
+        if (!req.headers["authorization"]) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+        next();
+    })
+);
+
+jest.mock("../src/api/v1/middleware/authorize", () =>
+    jest.fn(({ hasRole }: { hasRole: string[] }) =>
+        (req: Request, res: Response, next: NextFunction) => {
+            const userRole = req.headers["x-roles"];
+
+            if (Array.isArray(userRole)) {
+                if (!userRole.some(role => hasRole.includes(role))) {
+                    return res.status(403).json({ error: "Forbidden: Insufficient permissions" });
+                }
+            } else if (!userRole || !hasRole.includes(userRole)) {
+                return res.status(403).json({ error: "Forbidden: Insufficient permissions" });
+            }
+
+            next();
+        })
+);
+
+
 jest.mock("../src/api/v1/controllers/exerciseController", () => ({
-    createExercise: jest.fn((req, res) => res.status(201).send()),
-    getAllExercises: jest.fn((req, res) => res.status(200).send()),
-    getExerciseById: jest.fn((req, res) => res.status(200).send()),
-    updateExercise: jest.fn((req, res) => res.status(200).send()),
+    createExercise: jest.fn((req, res) => res.status(201).json({ message: "Exercise created successfully" })),
+    getAllExercises: jest.fn((req, res) => res.status(200).json({ exercises: ["Exercise1", "Exercise2"] })),
+    getExerciseById: jest.fn((req, res) => res.status(200).json({ exercise: "Exercise1" })),
+    updateExercise: jest.fn((req, res) => res.status(200).json({ message: "Exercise updated successfully" })),
     deleteExercise: jest.fn((req, res) => res.status(204).send()),
 }));
 
@@ -22,7 +50,7 @@ describe("Exercise Routes", () => {
     });
 
     describe("POST /api/v1/exercise", () => {
-        it("should call createExercise controller", async () => {
+        it("should allow authorized users to create an exercise", async () => {
             const mockExercise = {
                 workoutId: "workout123",
                 name: "Push-up",
@@ -33,41 +61,49 @@ describe("Exercise Routes", () => {
                 reps: 15,
             };
 
-            await request(app)
+            const response = await request(app)
                 .post("/api/v1/exercise")
+                .set("authorization", "Bearer token")
+                .set("x-roles", "lite")
                 .send(mockExercise);
 
+            expect(response.status).toBe(201);
+            expect(response.body.message).toBe("Exercise created successfully");
             expect(createExercise).toHaveBeenCalled();
-            expect(createExercise).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), expect.any(Function));
         });
     });
 
     describe("GET /api/v1/exercise", () => {
-        it("should call getAllExercises controller", async () => {
-            const queryParams = { workoutId: "workout123" };
-
-            await request(app)
+        it("should allow authorized users to retrieve all exercises", async () => {
+            const response = await request(app)
                 .get("/api/v1/exercise")
-                .query(queryParams);
+                .set("authorization", "Bearer token")
+                .set("x-roles", "lite")
+                .query({ workoutId: "workout123" });
 
+            expect(response.status).toBe(200);
+            expect(response.body.exercises).toEqual(["Exercise1", "Exercise2"]);
             expect(getAllExercises).toHaveBeenCalled();
-            expect(getAllExercises).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), expect.any(Function));
         });
     });
 
     describe("GET /api/v1/exercise/:id", () => {
-        it("should call getExerciseById controller", async () => {
+        it("should allow authorized users to retrieve an exercise by ID", async () => {
             const exerciseId = "exercise123";
 
-            await request(app).get(`/api/v1/exercise/${exerciseId}`);
+            const response = await request(app)
+                .get(`/api/v1/exercise/${exerciseId}`)
+                .set("authorization", "Bearer token")
+                .set("x-roles", "lite");
 
+            expect(response.status).toBe(200);
+            expect(response.body.exercise).toBe("Exercise1");
             expect(getExerciseById).toHaveBeenCalled();
-            expect(getExerciseById).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), expect.any(Function));
         });
     });
 
     describe("PUT /api/v1/exercise/:id", () => {
-        it("should call updateExercise controller", async () => {
+        it("should allow authorized users to update an exercise", async () => {
             const exerciseId = "exercise123";
             const updatedExercise = {
                 name: "Updated Push-up",
@@ -78,23 +114,29 @@ describe("Exercise Routes", () => {
                 reps: 20,
             };
 
-            await request(app)
+            const response = await request(app)
                 .put(`/api/v1/exercise/${exerciseId}`)
+                .set("authorization", "Bearer token")
+                .set("x-roles", "lite")
                 .send(updatedExercise);
 
+            expect(response.status).toBe(200);
+            expect(response.body.message).toBe("Exercise updated successfully");
             expect(updateExercise).toHaveBeenCalled();
-            expect(updateExercise).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), expect.any(Function));
         });
     });
 
     describe("DELETE /api/v1/exercise/:id", () => {
-        it("should call deleteExercise controller", async () => {
+        it("should allow authorized users to delete an exercise", async () => {
             const exerciseId = "exercise123";
 
-            await request(app).delete(`/api/v1/exercise/${exerciseId}`);
+            const response = await request(app)
+                .delete(`/api/v1/exercise/${exerciseId}`)
+                .set("authorization", "Bearer token")
+                .set("x-roles", "lite");
 
+            expect(response.status).toBe(204);
             expect(deleteExercise).toHaveBeenCalled();
-            expect(deleteExercise).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), expect.any(Function));
         });
     });
 });

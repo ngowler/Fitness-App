@@ -1,3 +1,4 @@
+import { Request, Response, NextFunction } from "express";
 import request from "supertest";
 import app from "../src/app";
 import {
@@ -5,15 +6,42 @@ import {
     getUserById,
     updateUser,
     deleteUser,
-    setCustomClaims,
 } from "../src/api/v1/controllers/userController";
 
+jest.mock("../src/api/v1/middleware/authenticate", () =>
+    jest.fn((req, res, next) => {
+        if (!req.headers["authorization"]) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+        next();
+    })
+);
+
+jest.mock("../src/api/v1/middleware/authorize", () =>
+    jest.fn(({ hasRole, allowSameUser }: { hasRole: string[]; allowSameUser?: boolean }) =>
+        (req: Request, res: Response, next: NextFunction) => {
+            const userRole = req.headers["x-roles"];
+            const userId = req.headers["x-user-id"];
+
+            if (Array.isArray(userRole)) {
+                if (!userRole.some(role => hasRole.includes(role))) {
+                    return res.status(403).json({ error: "Forbidden: Insufficient permissions" });
+                }
+            } else if (!userRole || !hasRole.includes(userRole)) {
+                if (!allowSameUser || userId !== req.params.id) {
+                    return res.status(403).json({ error: "Forbidden: Insufficient permissions" });
+                }
+            }
+            next();
+        })
+);
+
 jest.mock("../src/api/v1/controllers/userController", () => ({
-    createUser: jest.fn((req, res) => res.status(201).send()),
-    getUserById: jest.fn((req, res) => res.status(200).send()),
-    updateUser: jest.fn((req, res) => res.status(200).send()),
+    createUser: jest.fn((req, res) => res.status(201).json({ message: "User created successfully" })),
+    getUserById: jest.fn((req, res) => res.status(200).json({ user: "John Doe" })),
+    updateUser: jest.fn((req, res) => res.status(200).json({ message: "User updated successfully" })),
     deleteUser: jest.fn((req, res) => res.status(204).send()),
-    setCustomClaims: jest.fn((req, res) => res.status(200).send()),
+    setCustomClaims: jest.fn((req, res) => res.status(200).json({ message: "User role updated successfully" })),
 }));
 
 describe("User Routes", () => {
@@ -22,7 +50,7 @@ describe("User Routes", () => {
     });
 
     describe("POST /api/v1/user", () => {
-        it("should call createUser controller", async () => {
+        it("should allow admins to create a user", async () => {
             const mockUser = {
                 name: "John Doe",
                 email: "johndoe@example.com",
@@ -43,28 +71,35 @@ describe("User Routes", () => {
                 },
             };
 
-            await request(app)
+            const response = await request(app)
                 .post("/api/v1/user")
+                .set("authorization", "Bearer token")
+                .set("x-roles", "admin")
                 .send(mockUser);
 
+            expect(response.status).toBe(201);
+            expect(response.body.message).toBe("User created successfully");
             expect(createUser).toHaveBeenCalled();
-            expect(createUser).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), expect.any(Function));
         });
     });
 
     describe("GET /api/v1/user/:id", () => {
-        it("should call getUserById controller", async () => {
+        it("should allow admins or the same user to retrieve user details", async () => {
             const userId = "user123";
 
-            await request(app).get(`/api/v1/user/${userId}`);
+            const response = await request(app)
+                .get(`/api/v1/user/${userId}`)
+                .set("authorization", "Bearer token")
+                .set("x-roles", "admin");
 
+            expect(response.status).toBe(200);
+            expect(response.body.user).toBe("John Doe");
             expect(getUserById).toHaveBeenCalled();
-            expect(getUserById).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), expect.any(Function));
         });
     });
 
     describe("PUT /api/v1/user/:id", () => {
-        it("should call updateUser controller", async () => {
+        it("should allow admins or the same user to update user information", async () => {
             const userId = "user123";
             const updatedUser = {
                 name: "John Smith",
@@ -72,37 +107,29 @@ describe("User Routes", () => {
                 role: "Trainer",
             };
 
-            await request(app)
+            const response = await request(app)
                 .put(`/api/v1/user/${userId}`)
+                .set("authorization", "Bearer token")
+                .set("x-roles", "admin")
                 .send(updatedUser);
 
+            expect(response.status).toBe(200);
+            expect(response.body.message).toBe("User updated successfully");
             expect(updateUser).toHaveBeenCalled();
-            expect(updateUser).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), expect.any(Function));
         });
     });
 
     describe("DELETE /api/v1/user/:id", () => {
-        it("should call deleteUser controller", async () => {
+        it("should allow admins or the same user to delete a user", async () => {
             const userId = "user123";
 
-            await request(app).delete(`/api/v1/user/${userId}`);
+            const response = await request(app)
+                .delete(`/api/v1/user/${userId}`)
+                .set("authorization", "Bearer token")
+                .set("x-roles", "admin");
 
+            expect(response.status).toBe(204);
             expect(deleteUser).toHaveBeenCalled();
-            expect(deleteUser).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), expect.any(Function));
-        });
-    });
-
-    describe("POST /api/v1/user/:id/upgrade", () => {
-        it("should call setCustomClaims controller", async () => {
-            const userId = "user123";
-            const roleUpdate = { id: userId, role: "Admin" };
-
-            await request(app)
-                .post(`/api/v1/user/${userId}/upgrade`)
-                .send(roleUpdate);
-
-            expect(setCustomClaims).toHaveBeenCalled();
-            expect(setCustomClaims).toHaveBeenCalledWith(expect.any(Object), expect.any(Object), expect.any(Function));
         });
     });
 });

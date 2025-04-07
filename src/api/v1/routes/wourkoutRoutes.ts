@@ -1,4 +1,6 @@
 import express, { Router } from "express";
+import authenticate from "../middleware/authenticate";
+import isAuthorized from "../middleware/authorize";
 import {
     createWorkout,
     getAllWorkouts,
@@ -18,14 +20,48 @@ import {
 const router: Router = express.Router();
 
 // Create a new workout
-router.post("/", validateRequest(postWorkoutSchema), createWorkout);
+router.post(
+    "/",
+    authenticate,
+    isAuthorized({ hasRole: ["lite", "premium", "trainer"] }),
+    validateRequest(postWorkoutSchema),
+    createWorkout
+);
+
 // Retrieve all workouts for the authenticated user
-router.get("/", validateRequest(getWorkoutsByUserSchema), getAllWorkouts);
+router.get(
+    "/",
+    authenticate,
+    isAuthorized({ hasRole: ["trainer"], allowSameUser: true }),
+    validateRequest(getWorkoutsByUserSchema),
+    getAllWorkouts
+);
+
 // Retrieve a specific workout by ID
-router.get("/:id", validateRequest(getWorkoutByIdSchema), getWorkoutById);
+router.get(
+    "/:id",
+    authenticate,
+    isAuthorized({ hasRole: ["trainer"], allowSameUser: true }),
+    validateRequest(getWorkoutByIdSchema),
+    getWorkoutById
+);
+
 // Edit a workout
-router.put("/:id", validateRequest(putWorkoutSchema), updateWorkout);
+router.put(
+    "/:id",
+    authenticate,
+    isAuthorized({ hasRole: ["trainer"], allowSameUser: true }),
+    validateRequest(putWorkoutSchema),
+    updateWorkout
+);
+
 // Delete a workout
-router.delete("/:id", validateRequest(deleteWorkoutSchema), deleteWorkout);
+router.delete(
+    "/:id",
+    authenticate,
+    isAuthorized({ hasRole: ["trainer"], allowSameUser: true }),
+    validateRequest(deleteWorkoutSchema),
+    deleteWorkout
+);
 
 export default router;
