@@ -15,14 +15,15 @@ const router: Router = express.Router();
 
 /**
  * @route POST /setCustomClaims
- * @description Set custom claims for a user.
- * @note Only accessible to administrators.
- *
+ * @description Set custom claims for authenticated users.
+ * 
  * @openapi
- * /api/v1/admin/setCustomClaims:
+ * /setCustomClaims:
  *   post:
- *     summary: Set custom user claims
- *     tags: [Admin]
+ *     summary: Set custom claims for a user
+ *     tags: [Claims]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -30,36 +31,19 @@ const router: Router = express.Router();
  *           schema:
  *             type: object
  *             properties:
- *               uid:
- *                 type: string
- *                 description: UID of the user to set claims for
  *               claims:
  *                 type: object
- *                 additionalProperties:
- *                   type: string
- *                 description: Custom claims to assign to the user
- *     security:
- *       - BearerAuth: []
+ *                 description: An object containing custom claims to set for the user.
+ *                 example: { "role": "admin", "permissions": ["read", "write"] }
  *     responses:
  *       200:
- *         description: Custom claims successfully set for the user
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Custom claims set for user: {uid}
+ *         description: Custom claims set successfully
+ *       400:
+ *         description: Invalid request payload
  *       401:
- *         description: Unauthorized - User not authenticated
- *       403:
- *         description: Forbidden - User not authorized
+ *         description: Unauthorized access
  *       500:
- *         description: Internal server error
+ *         description: Server error
  */
 router.post(
     "/setCustomClaims",
