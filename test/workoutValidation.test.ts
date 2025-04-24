@@ -56,7 +56,9 @@ describe("validate function for workouts", () => {
                 name: "Morning Workout",
                 date: "2025-04-06T08:30:00Z",
             };
-            expect(() => validate(postWorkoutSchema, data)).toThrow("Exercises are required");
+            expect(() => validate(postWorkoutSchema, data)).toThrow(
+                "Validation error: \"userId\" is not allowed, Either 'exerciseLibraryIds' or 'exercises' must be provided, but not both."
+            );
         });
     });
 

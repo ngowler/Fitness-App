@@ -46,19 +46,12 @@ export const postWorkoutSchema: ObjectSchema = Joi.object({
     exerciseLibraryIds: Joi.array().items(Joi.string()).optional().messages({
         "array.base": "Exercise library IDs must be an array of strings",
     }),
-    numberOfExercises: Joi.number().optional().min(1).messages({
-        "number.base": "Number of exercises must be a number",
-        "number.min": "Number of exercises must be at least 1",
+    exercises: Joi.array().items(exerciseSchema).optional().messages({
+        "array.base": "Exercises must be an array of valid Exercise objects",
     }),
-    exercises: Joi.array()
-        .items(exerciseSchema)
-        .min(1)
-        .required()
-        .messages({
-            "any.required": "Exercises are required",
-            "array.base": "Exercises must be an array of valid Exercise objects",
-            "array.min": "A workout must include at least one exercise",
-        }),
+}).xor('exerciseLibraryIds', 'exercises').messages({
+    "object.missing": "Either 'exerciseLibraryIds' or 'exercises' must be provided, but not both.",
+    "object.xor": "You cannot provide both 'exerciseLibraryIds' and 'exercises'.",
 });
 
 export const getWorkoutsByUserSchema: ObjectSchema = Joi.object({

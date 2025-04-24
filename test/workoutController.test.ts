@@ -41,25 +41,26 @@ describe("Workout Controller", () => {
             };
 
             (workoutService.createWorkout as jest.Mock).mockResolvedValue(mockNewWorkout);
-            mockReq.body = {
-                workoutData: {
-                    userId: "123",
-                    name: "Strength Training",
-                    description: "A workout for building muscle",
-                    date: "2025-04-05",
-                    exercises: [
-                        {
-                            id: "101",
-                            name: "Squat",
-                            equipment: ["Barbell"],
-                            musclesWorked: ["Legs", "Glutes"],
-                            intensity: "High",
-                            sets: 5,
-                            reps: 10,
-                        },
-                    ],
+            const mockReq = {
+                body: {
+                    workoutData: {
+                        userId: "123",
+                        name: "Strength Training",
+                        description: "A workout for building muscle",
+                        date: "2025-04-05T00:00:00Z",
+                        exercises: [
+                            {
+                                id: "101",
+                                name: "Squat",
+                                equipment: ["Barbell"],
+                                musclesWorked: ["Legs", "Glutes"],
+                                intensity: "High",
+                                sets: 5,
+                                reps: 10,
+                            },
+                        ],
+                    },
                 },
-                exerciseLibraryIds: ["101", "102"],
             };
 
             await workoutController.createWorkout(mockReq as Request, mockRes as Response, mockNext);

@@ -89,7 +89,6 @@ router.get(
     "/",
     authenticate,
     isAuthorized({ hasRole: ["trainer"], allowSameUser: true }),
-    validateRequest(getWorkoutsByUserSchema),
     getAllWorkouts
 );
 

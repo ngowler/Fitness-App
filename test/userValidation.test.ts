@@ -17,7 +17,8 @@ describe("validate function for users", () => {
             const data: Data = {
                 name: "John Doe",
                 email: "john.doe@example.com",
-                role: "Premium",
+                password: "Secure123!",
+                role: "premium",
                 healthMetrics: {
                     weight: 75,
                     height: 180,
@@ -39,15 +40,26 @@ describe("validate function for users", () => {
         it("should throw an error for missing name", () => {
             const data: Data = {
                 email: "john.doe@example.com",
+                password: "Secure123!",
                 role: "Premium",
             };
             expect(() => validate(postUserSchema, data)).toThrow("Name is required");
+        });
+
+        it("should throw an error for missing password", () => {
+            const data: Data = {
+                name: "John Doe",
+                email: "john.doe@example.com",
+                role: "Premium",
+            };
+            expect(() => validate(postUserSchema, data)).toThrow("Password is required");
         });
 
         it("should throw an error for invalid email format", () => {
             const data: Data = {
                 name: "John Doe",
                 email: "john.doe",
+                password: "Secure123!",
                 role: "Premium",
             };
             expect(() => validate(postUserSchema, data)).toThrow("Email must be valid");
@@ -72,6 +84,7 @@ describe("validate function for users", () => {
                 id: "1",
                 name: "Jane Doe",
                 email: "jane.doe@example.com",
+                // Removed password field for user updates
             };
             expect(() => validate(putUserSchema, data)).not.toThrow();
         });
@@ -115,7 +128,8 @@ describe("validateRequest middleware for users", () => {
         req.body = {
             name: "John Doe",
             email: "john.doe@example.com",
-            role: "Lite",
+            password: "Secure123!",
+            role: "lite",
             healthMetrics: {
                 weight: 65,
                 height: 175,
@@ -132,7 +146,8 @@ describe("validateRequest middleware for users", () => {
     it("should return 400 for missing name", () => {
         req.body = {
             email: "john.doe@example.com",
-            role: "Lite",
+            password: "Secure123!",
+            role: "lite",
         };
 
         validateRequest(postUserSchema)(req as Request, res as Response, next);

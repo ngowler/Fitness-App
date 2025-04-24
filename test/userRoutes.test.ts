@@ -66,6 +66,7 @@ describe("User Routes", () => {
             const mockUser: {
                 name: string;
                 email: string;
+                password: string;
                 role: string;
                 healthMetrics: { weight: number; height: number };
                 workoutPreferences: { daysAvailable: string[]; timePerDay: number; gymAccess: boolean };
@@ -73,7 +74,8 @@ describe("User Routes", () => {
             } = {
                 name: "John Doe",
                 email: "johndoe@example.com",
-                role: "Premium",
+                password: "Secure123!",
+                role: "premium",
                 healthMetrics: {
                     weight: 70,
                     height: 175,
@@ -123,7 +125,7 @@ describe("User Routes", () => {
             const updatedUser: { name: string; email: string; role: string } = {
                 name: "John Smith",
                 email: "johnsmith@example.com",
-                role: "Trainer",
+                role: "trainer",
             };
 
             const response: SupertestResponse = await request(app)

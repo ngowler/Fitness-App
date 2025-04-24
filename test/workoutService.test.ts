@@ -56,11 +56,13 @@ describe("Workout Service", () => {
                 ],
             };
             const mockWorkoutId: string = "workout123";
+            const mockStrings = ["value1", "value2"]; 
+
 
             (createDocument as jest.Mock).mockResolvedValue(mockWorkoutId);
             (getDocuments as jest.Mock).mockResolvedValue(mockExercisesSnapshot);
 
-            const result: Workout = await createWorkout(mockWorkoutData, mockUserId, 2);
+            const result: Workout = await createWorkout(mockWorkoutData, mockUserId, mockStrings)
 
             expect(createDocument).toHaveBeenCalledWith("Workouts", { ...mockWorkoutData, userId: mockUserId });
             expect(getDocuments).toHaveBeenCalledWith("ExerciseLibrary");
@@ -70,8 +72,9 @@ describe("Workout Service", () => {
 
         it("should throw an error if user ID is missing", async (): Promise<void> => {
             const mockWorkoutData: Partial<Workout> = { name: "Morning Routine" };
+            const mockStrings = ["value1", "value2"]; 
 
-            await expect(createWorkout(mockWorkoutData, "", 2)).rejects.toThrow(
+            await expect(createWorkout(mockWorkoutData, "", mockStrings)).rejects.toThrow(
                 new ServiceError("Failed to create workout: User ID is required to create a workout.", "VALIDATION_ERROR")
             );
 
@@ -91,6 +94,7 @@ describe("Workout Service", () => {
                     data: (): Partial<Workout> => ({
                         name: "Workout 1",
                         userId: "user123",
+                        date: "2025-04-07",
                         exercises: [],
                     }),
                 },
@@ -99,6 +103,7 @@ describe("Workout Service", () => {
                     data: (): Partial<Workout> => ({
                         name: "Workout 2",
                         userId: "user456",
+                        date: "2025-04-07",
                         exercises: [],
                     }),
                 },

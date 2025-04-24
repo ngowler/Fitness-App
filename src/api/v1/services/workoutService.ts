@@ -5,8 +5,10 @@ import {
     deleteDocument,
     getDocumentById,
 } from "../repositories/firestoreRepository";
+import { createExercise } from "./exerciseService";
 import { Workout } from "../models/workoutModel";
 import { Exercise } from "../models/exerciseModel";
+import { ExerciseLibrary } from "../models/excersiseLibraryModel";
 import { ServiceError } from "../errors/errors";
 import { getErrorMessage, getErrorCode } from "../utils/errorUtils";
 
@@ -23,46 +25,80 @@ const COLLECTION: string = "workouts";
 export const createWorkout = async (
     workoutData: Partial<Workout>,
     userId: string,
-    numberOfExercises: number = 5
+    exerciseLibraryIds: string[]
 ): Promise<Workout> => {
     try {
-
+        // Validate required fields
         if (!userId) {
             throw new Error("User ID is required to create a workout.");
         }
 
-        const workoutWithUserId: Partial<Workout> & { userId: string } = { ...workoutData, userId };
-        const workoutId: string = await createDocument("Workouts", workoutWithUserId);
-        const exercisesSnapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData> = await getDocuments("ExerciseLibrary");
-
-        const allExercises: Exercise[] = exercisesSnapshot.docs.map((doc) => {
-            const exerciseData: Partial<Exercise> & { id: string } = { id: doc.id, ...doc.data() };
-            if (!exerciseData.id) {
-                throw new Error("Exercise ID is missing or invalid.");
-            }
-            return exerciseData as Exercise;
-        });
-
-        const selectedExercises: Exercise[] = [];
-        const shuffledExercises: Exercise[] = allExercises.sort(() => 0.5 - Math.random());
-        for (let i: number = 0; i < Math.min(numberOfExercises, shuffledExercises.length); i++) {
-            selectedExercises.push(shuffledExercises[i]);
+        if (!workoutData.name) {
+            throw new Error("Workout name is required.");
         }
 
-        const workoutExercises: Exercise[] = selectedExercises.map((exercise: Exercise) => ({
-            ...exercise,
-            workoutId,
-            sets: 0,
-            reps: 0,
-        }));
+        if (!workoutData.date) {
+            throw new Error("Workout date is required.");
+        }
 
-        await Promise.all(
-            workoutExercises.map((exerciseData: Exercise) =>
-                createDocument("Exercise", exerciseData)
-            )
+        // Create the workout document first to get a valid workoutId
+        const workoutWithUserId: Partial<Workout> = {
+            userId,
+            name: workoutData.name,
+            description: workoutData.description,
+            date: workoutData.date,
+            exercises: [], // Placeholder exercises
+        };
+
+        const workoutId: string = await createDocument("Workouts", workoutWithUserId);
+        console.log(`Workout created with ID: ${workoutId}`);
+
+        // Double-check workout existence to ensure Firestore consistency
+        const workoutSnapshot = await getDocumentById("Workouts", workoutId);
+        if (!workoutSnapshot.exists) {
+            throw new Error(`Workout with ID ${workoutId} not found after creation.`);
+        }
+
+        // Fetch exercises from ExerciseLibrary using the provided IDs
+        const exercisesSnapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData> =
+            await getDocuments("exercise-library");
+        const allExercises: ExerciseLibrary[] = exercisesSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        })) as ExerciseLibrary[];
+
+        const selectedExercises: ExerciseLibrary[] = exerciseLibraryIds
+            .map((id) => allExercises.find((exercise) => exercise.id === id))
+            .filter((exercise): exercise is ExerciseLibrary => !!exercise);
+
+        if (selectedExercises.length === 0) {
+            throw new Error("No exercises found for the provided IDs.");
+        }
+
+        // Create exercises and associate them with the workout
+        const workoutExercises: Exercise[] = await Promise.all(
+            selectedExercises.map(async (exercise) => {
+                return await createExercise({
+                    name: exercise.name,
+                    equipment: exercise.equipment,
+                    musclesWorked: exercise.musclesWorked,
+                    intensity: exercise.intensity,
+                    workoutId, // Pass the confirmed workoutId
+                    sets: 4,
+                    reps: 12,
+                });
+            })
         );
 
-        return { id: workoutId, ...workoutWithUserId, exercises: workoutExercises } as Workout;
+        // Update the workout document with the created exercises
+        await updateDocument("Workouts", workoutId, { exercises: workoutExercises });
+
+        // Return the complete workout
+        return {
+            id: workoutId,
+            ...workoutWithUserId,
+            exercises: workoutExercises,
+        } as Workout;
     } catch (error: unknown) {
         throw new ServiceError(
             `Failed to create workout: ${getErrorMessage(error)}`,

@@ -10,12 +10,16 @@ export const postUserSchema: ObjectSchema = Joi.object({
         "string.empty": "Email cannot be empty",
         "string.email": "Email must be valid",
     }),
+    password: Joi.string().min(6).required().messages({
+        "any.required": "Password is required",
+        "string.min": "Password must be at least 6 characters long",
+    }),
     role: Joi.string()
-        .valid("Lite", "Premium", "Trainer", "Admin")
+        .valid("lite", "premium", "trainer", "admin")
         .required()
         .messages({
             "any.required": "Role is required",
-            "any.only": "Role must be one of 'Lite', 'Premium', 'Trainer', or 'Admin'",
+            "any.only": "Role must be one of 'lite', 'premium', 'trainer', or 'admin'",
         }),
     healthMetrics: Joi.object({
         weight: Joi.number().positive().required().messages({
@@ -75,8 +79,11 @@ export const putUserSchema: ObjectSchema = Joi.object({
     email: Joi.string().email().optional().messages({
         "string.email": "Email must be valid",
     }),
+    password: Joi.string().min(6).optional().messages({
+        "string.min": "Password must be at least 6 characters long",
+    }),
     role: Joi.string()
-        .valid("Lite", "Premium", "Trainer", "Admin")
+        .valid("lite", "premium", "trainer", "admin")
         .optional()
         .messages({
             "any.only": "Role must be one of 'Lite', 'Premium', 'Trainer', or 'Admin'",

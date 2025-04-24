@@ -35,7 +35,7 @@ describe("Exercise Library Service", () => {
 
             const result: ExerciseLibrary = await createExercise(mockExercise);
 
-            expect(createDocument).toHaveBeenCalledWith("exercises", mockExercise);
+            expect(createDocument).toHaveBeenCalledWith("exercise-library", mockExercise);
             expect(result).toEqual({ id: "exercise123", ...mockExercise });
         });
 
@@ -66,7 +66,7 @@ describe("Exercise Library Service", () => {
 
             const result: ExerciseLibrary[] = await getAllExercises({ intensity: "Low" });
 
-            expect(getDocuments).toHaveBeenCalledWith("exercises");
+            expect(getDocuments).toHaveBeenCalledWith("exercise-library");
             expect(result).toEqual([
                 {
                     id: "exercise1",
@@ -97,7 +97,7 @@ describe("Exercise Library Service", () => {
 
             const result: ExerciseLibrary = await getExerciseById("exercise1");
 
-            expect(getDocumentById).toHaveBeenCalledWith("exercises", "exercise1");
+            expect(getDocumentById).toHaveBeenCalledWith("exercise-library", "exercise1");
             expect(result).toEqual({ id: "exercise1", name: "Push-Up" });
         });
 
@@ -123,7 +123,7 @@ describe("Exercise Library Service", () => {
 
             const result: ExerciseLibrary = await updateExercise("exercise1", mockExercise);
 
-            expect(updateDocument).toHaveBeenCalledWith("exercises", "exercise1", mockExercise);
+            expect(updateDocument).toHaveBeenCalledWith("exercise-library", "exercise1", mockExercise);
             expect(result).toEqual({ id: "exercise1", ...mockExercise });
         });
 
@@ -140,7 +140,7 @@ describe("Exercise Library Service", () => {
 
             await deleteExercise("exercise1");
 
-            expect(deleteDocument).toHaveBeenCalledWith("exercises", "exercise1");
+            expect(deleteDocument).toHaveBeenCalledWith("exercise-library", "exercise1");
         });
 
         it("should handle deletion errors", async () => {

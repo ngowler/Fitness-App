@@ -9,7 +9,7 @@ import { ExerciseLibrary } from "../models/excersiseLibraryModel"
 import { ServiceError } from "../errors/errors";
 import { getErrorMessage, getErrorCode } from "../utils/errorUtils";
 
-const COLLECTION: string = "exercises";
+const COLLECTION: string = "exercise-library";
 
 /**
  * @description Create a new exercise.

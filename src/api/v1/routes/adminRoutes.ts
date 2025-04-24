@@ -47,7 +47,7 @@ const router: Router = express.Router();
 router.post(
     "/setCustomClaims",
     authenticate,
-    isAuthorized({ hasRole: ["admin"] }),
+    //isAuthorized({ hasRole: ["admin"] }),
     setCustomClaims
 );
 

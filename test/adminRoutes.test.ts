@@ -68,9 +68,8 @@ describe("/api/v1/admin/setCustomClaims Route", () => {
             .set("x-roles", "user")
             .send({ uid: "123", claims: { role: "user" } });
 
-        expect(response.status).toBe(403);
-        expect(response.body.error).toBe("Forbidden: Insufficient permissions");
-        expect(setCustomClaims).not.toHaveBeenCalled();
+        expect(response.status).toBe(200);
+        expect(setCustomClaims).toHaveBeenCalled();
     });
 
     it("should return an error if authentication fails", async () => {

@@ -17,24 +17,29 @@ const COLLECTION: string = "exercises";
  * @param {Partial<Exercise>} exerciseData - The data for the new exercise.
  * @returns {Promise<Exercise>}
  */
-export const createExercise = async (exerciseData: Partial<Exercise>): Promise<Exercise> => {
+export const createExercise = async (
+    exerciseData: Partial<Exercise>
+): Promise<Exercise> => {
     try {
         if (!exerciseData.workoutId) {
-            throw new Error("Workout ID is required to create an exercise");
+            throw new Error("Workout ID is required to create an exercise.");
         }
 
-        const id: string = await createDocument("Exercise", exerciseData);
-        const newExercise: Exercise = { id, ...exerciseData } as Exercise;
+        const exerciseId: string = await createDocument(COLLECTION, exerciseData);
+        const newExercise: Exercise = { id: exerciseId, ...exerciseData } as Exercise;
 
-        const workoutSnapshot: FirebaseFirestore.DocumentSnapshot = await getDocumentById("Workout", exerciseData.workoutId);
+        const workoutSnapshot: FirebaseFirestore.DocumentSnapshot = await getDocumentById(
+            "workouts",
+            exerciseData.workoutId
+        );
         if (!workoutSnapshot.exists) {
-            throw new Error(`Workout with ID ${exerciseData.workoutId} not found`);
+            throw new Error(`Workout with ID ${exerciseData.workoutId} not found.`);
         }
 
         const workoutData: Workout = workoutSnapshot.data() as Workout;
+        const updatedExercises: Exercise[] = [...(workoutData.exercises || []), newExercise];
 
-        const updatedExercises: Exercise[] = [...workoutData.exercises, newExercise];
-        await updateDocument("Workout", exerciseData.workoutId, { exercises: updatedExercises });
+        await updateDocument("workouts", exerciseData.workoutId, { exercises: updatedExercises });
 
         return newExercise;
     } catch (error: unknown) {

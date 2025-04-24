@@ -53,9 +53,9 @@ describe("Exercise Service", () => {
 
             const result: Exercise = await createExercise(mockExerciseData);
 
-            expect(createDocument).toHaveBeenCalledWith("Exercise", mockExerciseData);
-            expect(getDocumentById).toHaveBeenCalledWith("Workout", mockExerciseData.workoutId);
-            expect(updateDocument).toHaveBeenCalledWith("Workout", mockExerciseData.workoutId, {
+            expect(createDocument).toHaveBeenCalledWith("exercises", mockExerciseData);
+            expect(getDocumentById).toHaveBeenCalledWith("workouts", mockExerciseData.workoutId);
+            expect(updateDocument).toHaveBeenCalledWith("workouts", mockExerciseData.workoutId, {
                 exercises: [{ id: "exercise123", ...mockExerciseData }],
             });
             expect(result).toEqual({ id: "exercise123", ...mockExerciseData });
@@ -66,7 +66,7 @@ describe("Exercise Service", () => {
         
             await expect(createExercise(mockExerciseData)).rejects.toThrow(
                 new ServiceError(
-                    "Failed to create exercise and update workout: Workout ID is required to create an exercise",
+                    "Failed to create exercise and update workout: Workout ID is required to create an exercise.",
                     "VALIDATION_ERROR"
                 )
             );
