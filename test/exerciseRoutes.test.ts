@@ -37,7 +37,6 @@ jest.mock("../src/api/v1/middleware/authorize", () =>
         })
 );
 
-
 jest.mock("../src/api/v1/controllers/exerciseController", () => ({
     createExercise: jest.fn((req, res) => res.status(201).json({ message: "Exercise created successfully" })),
     getAllExercises: jest.fn((req, res) => res.status(200).json({ exercises: ["Exercise1", "Exercise2"] })),
@@ -55,6 +54,7 @@ describe("Exercise Routes", () => {
         it("should allow authorized users to create an exercise", async () => {
             const mockExercise: Exercise = {
                 workoutId: "workout123",
+                userId: "123",
                 name: "Push-up",
                 equipment: ["None"],
                 musclesWorked: ["Chest", "Triceps"],
@@ -109,6 +109,7 @@ describe("Exercise Routes", () => {
             const exerciseId: string = "exercise123";
             const updatedExercise: Partial<Exercise> = {
                 name: "Updated Push-up",
+                userId: "123",
                 equipment: ["None"],
                 musclesWorked: ["Chest", "Triceps"],
                 intensity: "High",
