@@ -93,7 +93,7 @@ router.post(
  *         description: Server error
  */
 router.get(
-    "/:workoutId",
+    "/:workoutId?",
     authenticate,
     isAuthorized({ allowSameUser: true, hasRole: ["trainer"] }),
     validateRequest(getExercisesByWorkoutSchema),

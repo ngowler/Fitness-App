@@ -29,20 +29,26 @@ export const getAllExercises = async (
     req: Request,
     res: Response,
     next: NextFunction
-): Promise<void> => {
+  ): Promise<void> => {
     try {
-        const { workoutId } = req.params;
-
-        const exercises: Exercise[] = await exerciseService.getAllExercises(workoutId as string);
-
-        res.status(HTTP_STATUS.OK).json(
-            successResponse(exercises, "Exercises Retrieved")
-        );
+        let workoutId: string | undefined = req.params.workoutId?.trim() || undefined;
+        const userId: string = res.locals.uid;
+        const userRole: string = res.locals.role;
+  
+      const exercises = await exerciseService.getAllExercises(
+        workoutId,
+        userId,
+        userRole
+      );
+  
+      res.status(HTTP_STATUS.OK).json(
+        successResponse(exercises, "Exercises Retrieved")
+      );
     } catch (error) {
-        next(error);
+      next(error);
     }
-};
-
+  };
+  
 /**
  * @description Get a specific exercise by ID.
  * @route GET /exercise/:id

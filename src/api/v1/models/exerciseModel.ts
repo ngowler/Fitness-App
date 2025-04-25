@@ -46,7 +46,7 @@
  */
 export type Exercise = {
     id?: string; // Optional identifier for the exercise
-    workoutId: string; // Identifier for the workout associated with the exercise
+    workoutId?: string; // Identifier for the workout associated with the exercise
     userId: string; // Identifier for the user associated with the exercise
     name: string; // Name of the exercise
     equipment: string[]; // List of required equipment

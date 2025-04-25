@@ -1,8 +1,7 @@
 import Joi, { ObjectSchema } from "joi";
 
 export const postExerciseSchema: ObjectSchema = Joi.object({
-    workoutId: Joi.string().required().messages({
-        "any.required": "Workout ID is required",
+    workoutId: Joi.string().optional().messages({
         "string.empty": "Workout ID cannot be empty",
     }),
     name: Joi.string().required().messages({
@@ -37,8 +36,7 @@ export const postExerciseSchema: ObjectSchema = Joi.object({
 });
 
 export const getExercisesByWorkoutSchema: ObjectSchema = Joi.object({
-    workoutId: Joi.string().required().messages({
-        "any.required": "Workout ID is required",
+    workoutId: Joi.string().optional().messages({
         "string.empty": "Workout ID cannot be empty",
     }),
 });
