@@ -16,21 +16,14 @@ export const createWorkout = async (
 ): Promise<void> => {
     try {
         const userId: string = res.locals.uid;
-        const { name, description, date, exerciseLibraryIds } = req.body;
+        const { name, description, exerciseLibraryIds } = req.body;
 
-        if (!name || !date || !exerciseLibraryIds || !Array.isArray(exerciseLibraryIds)) {
-            throw new Error("Invalid request data. Name, date, and exerciseLibraryIds are required.");
-        }
-
-        const selectionOptions: { mode: "selected"; exerciseLibraryIds: string[] } = {
-            mode: "selected",
-            exerciseLibraryIds: exerciseLibraryIds as string[],
-        };
+        const workoutDate: string = new Date().toISOString();
 
         const newWorkout: Workout = await workoutService.createWorkout(
-            { name, description, date },
+            { name, description, date: workoutDate },
             userId,
-            selectionOptions
+            exerciseLibraryIds
         );
 
         res.status(HTTP_STATUS.CREATED).json(successResponse(newWorkout, "Workout Created"));

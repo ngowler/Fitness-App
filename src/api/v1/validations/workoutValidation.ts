@@ -39,20 +39,23 @@ export const postWorkoutSchema: ObjectSchema = Joi.object({
     description: Joi.string().optional().messages({
         "string.empty": "Description cannot be empty",
     }),
-    date: Joi.string().isoDate().required().messages({
-        "any.required": "Date is required",
-        "string.isoDate": "Date must be in ISO 8601 format",
-    }),
-    exerciseLibraryIds: Joi.array().items(Joi.string()).optional().messages({
-        "array.base": "Exercise library IDs must be an array of strings",
-    }),
-    exercises: Joi.array().items(exerciseSchema).optional().messages({
-        "array.base": "Exercises must be an array of valid Exercise objects",
-    }),
-}).xor('exerciseLibraryIds', 'exercises').messages({
-    "object.missing": "Either 'exerciseLibraryIds' or 'exercises' must be provided, but not both.",
-    "object.xor": "You cannot provide both 'exerciseLibraryIds' and 'exercises'.",
+    date: Joi.string()
+        .optional()
+        .messages({
+            "string.empty": "Date cannot be empty",
+        }),
+    exerciseLibraryIds: Joi.array()
+        .items(Joi.string())
+        .min(1)
+        .required()
+        .messages({
+            "any.required": "Exercise Library IDs are required",
+            "array.min": "You must provide at least one exercise ID",
+        }),
+}).messages({
+    "object.base": "The request body must be a valid JSON object",
 });
+
 
 export const getWorkoutsByUserSchema: ObjectSchema = Joi.object({
     userId: Joi.string().required().messages({
