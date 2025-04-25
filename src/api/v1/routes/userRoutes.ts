@@ -89,7 +89,7 @@ router.post(
  *         description: Server error
  */
 router.get(
-    "/:id",
+    "/:uid",
     authenticate,
     isAuthorized({ hasRole: ["admin"], allowSameUser: true }),
     validateRequest(getUserByIdSchema),
@@ -137,7 +137,7 @@ router.get(
  *         description: Server error
  */
 router.put(
-    "/:id",
+    "/:uid",
     authenticate,
     isAuthorized({ hasRole: ["admin"], allowSameUser: true }),
     validateRequest(putUserSchema),
@@ -173,7 +173,7 @@ router.put(
  *         description: Server error
  */
 router.delete(
-    "/:id",
+    "/:uid",
     authenticate,
     isAuthorized({ hasRole: ["admin"], allowSameUser: true }),
     validateRequest(deleteUserSchema),

@@ -28,8 +28,8 @@ jest.mock("../src/api/v1/middleware/authorize", () =>
                 : (userRoleHeader as string | undefined);
 
             if (userRole) {
-                if (!hasRole.includes(userRole)) {
-                    if (!allowSameUser || userId !== req.params.id) {
+                if (!hasRole.includes(userRole.toLowerCase())) {
+                    if (!allowSameUser || userId !== req.params.uid) {
                         return res.status(403).json({ error: "Forbidden: Insufficient permissions" });
                     }
                 }
@@ -42,10 +42,22 @@ jest.mock("../src/api/v1/middleware/authorize", () =>
 
 jest.mock("../src/api/v1/controllers/userController", () => ({
     createUser: jest.fn((req: Request, res: Response): Response =>
-        res.status(201).json({ message: "User created successfully" })
+        res.status(201).json({
+            uid: "user123",
+            name: req.body.name,
+            email: req.body.email,
+            role: req.body.role,
+        })
     ),
     getUserById: jest.fn((req: Request, res: Response): Response =>
-        res.status(200).json({ user: "John Doe" })
+        res.status(200).json({
+            user: {
+                uid: req.params.uid,
+                name: "John Doe",
+                email: "johndoe@example.com",
+                role: "premium",
+            },
+        })
     ),
     updateUser: jest.fn((req: Request, res: Response): Response =>
         res.status(200).json({ message: "User updated successfully" })
@@ -63,25 +75,22 @@ describe("User Routes", () => {
 
     describe("POST /api/v1/user", () => {
         it("should allow admins to create a user", async (): Promise<void> => {
-            const mockUser: {
-                name: string;
-                email: string;
-                role: string;
-                healthMetrics: { weight: number; height: number };
-                workoutPreferences: { daysAvailable: string[]; timePerDay: number; gymAccess: boolean };
-                background: { experience: string; routine: string; goals: string };
-            } = {
+            const mockUser = {
                 name: "John Doe",
                 email: "johndoe@example.com",
+                password: "Secure123!",
                 role: "Premium",
                 healthMetrics: {
                     weight: 70,
                     height: 175,
+                    bodyFatPercentage: 15,
+                    injuriesOrLimitations: [],
                 },
                 workoutPreferences: {
                     daysAvailable: ["Monday", "Wednesday", "Friday"],
                     timePerDay: 60,
                     gymAccess: true,
+                    equipment: ["dumbbells"],
                 },
                 background: {
                     experience: "Beginner",
@@ -97,37 +106,38 @@ describe("User Routes", () => {
                 .send(mockUser);
 
             expect(response.status).toBe(201);
-            expect(response.body.message).toBe("User created successfully");
+            expect(response.body.name).toBe(mockUser.name);
+            expect(response.body.email).toBe(mockUser.email);
             expect(createUser).toHaveBeenCalled();
         });
     });
 
     describe("GET /api/v1/user/:id", () => {
         it("should allow admins or the same user to retrieve user details", async (): Promise<void> => {
-            const userId: string = "user123";
+            const uid: string = "user123";
 
             const response: SupertestResponse = await request(app)
-                .get(`/api/v1/user/${userId}`)
+                .get(`/api/v1/user/${uid}`)
                 .set("authorization", "Bearer token")
                 .set("x-roles", "admin");
 
             expect(response.status).toBe(200);
-            expect(response.body.user).toBe("John Doe");
+            expect(response.body.user.name).toBe("John Doe");
             expect(getUserById).toHaveBeenCalled();
         });
     });
 
     describe("PUT /api/v1/user/:id", () => {
         it("should allow admins or the same user to update user information", async (): Promise<void> => {
-            const userId: string = "user123";
-            const updatedUser: { name: string; email: string; role: string } = {
+            const uid: string = "user123";
+            const updatedUser = {
                 name: "John Smith",
                 email: "johnsmith@example.com",
                 role: "Trainer",
             };
 
             const response: SupertestResponse = await request(app)
-                .put(`/api/v1/user/${userId}`)
+                .put(`/api/v1/user/${uid}`)
                 .set("authorization", "Bearer token")
                 .set("x-roles", "admin")
                 .send(updatedUser);

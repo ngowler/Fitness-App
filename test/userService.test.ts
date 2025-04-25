@@ -4,151 +4,204 @@ import {
     updateUser,
     deleteUser,
 } from "../src/api/v1/services/userService";
-import {
-    createDocument,
-    updateDocument,
-    deleteDocument,
-    getDocumentById,
-} from "../src/api/v1/repositories/firestoreRepository";
 import { User } from "../src/api/v1/models/userModel";
 import { ServiceError } from "../src/api/v1/errors/errors";
+import { auth, db } from "../config/firebaseConfig";
 
-jest.mock("../src/api/v1/repositories/firestoreRepository", () => ({
-    createDocument: jest.fn(),
-    updateDocument: jest.fn(),
-    deleteDocument: jest.fn(),
-    getDocumentById: jest.fn(),
+jest.mock("../config/firebaseConfig", () => ({
+    auth: {
+        createUser: jest.fn(),
+        setCustomUserClaims: jest.fn(),
+    },
+    db: {
+        collection: jest.fn(() => ({
+            doc: jest.fn(() => ({
+                set: jest.fn(),
+                get: jest.fn(),
+                update: jest.fn(),
+                delete: jest.fn(),
+            })),
+        })),
+    },
 }));
 
 describe("User Service", () => {
+    beforeEach((): void => {
+        jest.clearAllMocks();
+    });
+
     describe("createUser", () => {
-        beforeEach((): void => {
-            jest.clearAllMocks();
-        });
-
-        it("should create a new user", async (): Promise<void> => {
-            const mockUserData: Partial<User> = { name: "John Doe", email: "john@example.com" };
-
-            (createDocument as jest.Mock).mockResolvedValue("user123");
-
+        it("should create a new Firebase user and Firestore document", async (): Promise<void> => {
+            const mockUserData: Partial<User> = {
+                name: "John Doe",
+                email: "john@example.com",
+                password: "Secure123!",
+            };
+            const mockFirebaseUser = { uid: "firebase123" };
+    
+            (auth.createUser as jest.Mock).mockResolvedValue(mockFirebaseUser);
+    
+            const mockDocSet = jest.fn();
+            (db.collection as jest.Mock).mockReturnValue({
+                doc: jest.fn(() => ({
+                    set: mockDocSet,
+                })),
+            });
+    
             const result: User = await createUser(mockUserData);
-
-            expect(createDocument).toHaveBeenCalledWith("users", mockUserData);
+        
+            expect(auth.createUser).toHaveBeenCalledWith({
+                email: mockUserData.email,
+                password: "Secure123!",
+            });
+    
             expect(result).toEqual({
-                id: "user123",
+                id: "firebase123",
+                name: mockUserData.name,
+                email: mockUserData.email,
+            });
+        });
+    
+        it("should throw an error if Firebase user creation fails", async (): Promise<void> => {
+            const mockUserData: Partial<User> = {
+                name: "John Doe",
+                email: "john@example.com",
+                password: "Secure123!",
+            };
+            const mockError: Error = new Error("Firebase creation failed");
+    
+            (auth.createUser as jest.Mock).mockRejectedValue(mockError);
+    
+            await expect(createUser(mockUserData)).rejects.toThrow(
+                new ServiceError("Failed to create user: Firebase creation failed", "FIREBASE_ERROR")
+            );
+    
+            expect(auth.createUser).toHaveBeenCalledWith({
+                email: mockUserData.email,
+                password: "Secure123!",
+            });
+        });
+    });
+    
+
+    describe("getUserById", () => {
+        it("should retrieve a user from Firestore by ID", async (): Promise<void> => {
+            const mockUserData = { name: "John Doe", email: "john@example.com" };
+            const mockDocGet = jest.fn().mockResolvedValue({
+                exists: true,
+                data: jest.fn(() => mockUserData),
+            });
+
+            (db.collection as jest.Mock).mockReturnValue({
+                doc: jest.fn(() => ({
+                    get: mockDocGet,
+                })),
+            });
+
+            const result: User = await getUserById("firebase123");
+
+            expect(db.collection).toHaveBeenCalledWith("users");
+            expect(mockDocGet).toHaveBeenCalled();
+            expect(result).toEqual({
+                id: "firebase123",
                 ...mockUserData,
             });
         });
 
-        it("should throw an error if creation fails", async (): Promise<void> => {
-            const mockUserData: Partial<User> = { name: "John Doe", email: "john@example.com" };
-            const mockError: Error = new Error("Creation failed");
+        it("should throw an error if the user does not exist", async (): Promise<void> => {
+            const mockDocGet = jest.fn().mockResolvedValue({ exists: false });
 
-            (createDocument as jest.Mock).mockRejectedValue(mockError);
-
-            await expect(createUser(mockUserData)).rejects.toThrow(
-                new ServiceError("Failed to create user: Creation failed", "ERROR_CODE")
-            );
-
-            expect(createDocument).toHaveBeenCalledWith("users", mockUserData);
-        });
-    });
-
-    describe("getUserById", () => {
-        beforeEach((): void => {
-            jest.clearAllMocks();
-        });
-
-        it("should retrieve a user by ID", async (): Promise<void> => {
-            const mockDoc: { id: string; exists: boolean; data: () => Partial<User> } = {
-                id: "user123",
-                exists: true,
-                data: (): Partial<User> => ({ name: "John Doe", email: "john@example.com" }),
-            };
-
-            (getDocumentById as jest.Mock).mockResolvedValue(mockDoc);
-
-            const result: User = await getUserById("user123");
-
-            expect(getDocumentById).toHaveBeenCalledWith("users", "user123");
-            expect(result).toEqual({
-                id: "user123",
-                name: "John Doe",
-                email: "john@example.com",
+            (db.collection as jest.Mock).mockReturnValue({
+                doc: jest.fn(() => ({
+                    get: mockDocGet,
+                })),
             });
-        });
 
-        it("should handle non-existent user", async (): Promise<void> => {
-            const mockDoc: { id: string; exists: boolean } = { id: "user123", exists: false };
-
-            (getDocumentById as jest.Mock).mockResolvedValue(mockDoc);
-
-            await expect(getUserById("user123")).rejects.toThrow(
-                new ServiceError("Failed to retrieve user user123: User with ID user123 not found.", "ERROR_CODE")
+            await expect(getUserById("firebase123")).rejects.toThrow(
+                new ServiceError(
+                    "Failed to retrieve user firebase123: Document not found in collection users with id firebase123",
+                    "NOT_FOUND"
+                )
             );
 
-            expect(getDocumentById).toHaveBeenCalledWith("users", "user123");
+            expect(db.collection).toHaveBeenCalledWith("users");
+            expect(mockDocGet).toHaveBeenCalled();
         });
     });
 
     describe("updateUser", () => {
-        beforeEach((): void => {
-            jest.clearAllMocks();
-        });
-
-        it("should update an existing user", async (): Promise<void> => {
-            const id: string = "user123";
+        it("should update an existing user's Firestore document", async (): Promise<void> => {
             const mockUserData: Partial<User> = { name: "Updated John Doe" };
+            const mockDocUpdate = jest.fn();
 
-            (updateDocument as jest.Mock).mockResolvedValue(undefined);
+            (db.collection as jest.Mock).mockReturnValue({
+                doc: jest.fn(() => ({
+                    update: mockDocUpdate,
+                })),
+            });
 
-            const result: User = await updateUser(id, mockUserData);
+            const result: User = await updateUser("firebase123", mockUserData);
 
-            expect(updateDocument).toHaveBeenCalledWith("users", id, mockUserData);
-            expect(result).toEqual({ id, ...mockUserData });
+            expect(db.collection).toHaveBeenCalledWith("users");
+            expect(mockDocUpdate).toHaveBeenCalledWith(mockUserData);
+            expect(result).toEqual({ id: "firebase123", ...mockUserData });
         });
 
-        it("should handle update error", async (): Promise<void> => {
-            const id: string = "user123";
+        it("should throw an error if the update fails", async (): Promise<void> => {
             const mockUserData: Partial<User> = { name: "Updated John Doe" };
             const mockError: Error = new Error("Update failed");
 
-            (updateDocument as jest.Mock).mockRejectedValue(mockError);
+            (db.collection as jest.Mock).mockReturnValue({
+                doc: jest.fn(() => ({
+                    update: jest.fn().mockRejectedValue(mockError),
+                })),
+            });
 
-            await expect(updateUser(id, mockUserData)).rejects.toThrow(
-                new ServiceError("Failed to update user user123: Update failed", "ERROR_CODE")
+            await expect(updateUser("firebase123", mockUserData)).rejects.toThrow(
+                new ServiceError(
+                    "Failed to update user firebase123: Failed to update document firebase123 in users: Update failed",
+                    "UPDATE_ERROR"
+                )
             );
 
-            expect(updateDocument).toHaveBeenCalledWith("users", id, mockUserData);
+            expect(db.collection).toHaveBeenCalledWith("users");
         });
     });
 
     describe("deleteUser", () => {
-        beforeEach((): void => {
-            jest.clearAllMocks();
-        });
-
         it("should delete a user by ID", async (): Promise<void> => {
-            const id: string = "user123";
+            const mockDocDelete = jest.fn();
 
-            (deleteDocument as jest.Mock).mockResolvedValue(undefined);
+            (db.collection as jest.Mock).mockReturnValue({
+                doc: jest.fn(() => ({
+                    delete: mockDocDelete,
+                })),
+            });
 
-            await deleteUser(id);
+            await deleteUser("firebase123");
 
-            expect(deleteDocument).toHaveBeenCalledWith("users", id);
+            expect(db.collection).toHaveBeenCalledWith("users");
+            expect(mockDocDelete).toHaveBeenCalled();
         });
 
-        it("should handle delete error", async (): Promise<void> => {
-            const id: string = "user123";
+        it("should throw an error if deletion fails", async (): Promise<void> => {
+            const id: string = "firebase123";
             const mockError: Error = new Error("Deletion failed");
 
-            (deleteDocument as jest.Mock).mockRejectedValue(mockError);
+            (db.collection as jest.Mock).mockReturnValue({
+                doc: jest.fn(() => ({
+                    delete: jest.fn().mockRejectedValue(mockError),
+                })),
+            });
 
             await expect(deleteUser(id)).rejects.toThrow(
-                new ServiceError("Failed to delete user user123: Deletion failed", "ERROR_CODE")
+                new ServiceError(
+                    `Failed to delete user ${id}: Failed to delete document ${id} from users: Deletion failed`,
+                    "DELETE_ERROR"
+                )
             );
 
-            expect(deleteDocument).toHaveBeenCalledWith("users", id);
+            expect(db.collection).toHaveBeenCalledWith("users");
         });
     });
 });

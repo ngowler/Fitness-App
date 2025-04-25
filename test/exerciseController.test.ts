@@ -23,6 +23,7 @@ describe("Exercise Controller", () => {
             const mockNewExercise: Exercise = {
                 id: "1",
                 workoutId: "123",
+                userId: "123",
                 name: "Push-up",
                 equipment: ["Mat"],
                 musclesWorked: ["Chest", "Triceps"],
@@ -34,6 +35,7 @@ describe("Exercise Controller", () => {
             (exerciseService.createExercise as jest.Mock).mockResolvedValue(mockNewExercise);
             mockReq.body = {
                 workoutId: "123",
+                userId: "123",
                 name: "Push-up",
                 equipment: ["Mat"],
                 musclesWorked: ["Chest", "Triceps"],
@@ -59,6 +61,7 @@ describe("Exercise Controller", () => {
                 {
                     id: "1",
                     workoutId: "123",
+                    userId: "123",
                     name: "Push-up",
                     equipment: ["Mat"],
                     musclesWorked: ["Chest", "Triceps"],
@@ -67,12 +70,18 @@ describe("Exercise Controller", () => {
                     reps: 15,
                 },
             ];
-
+    
             (exerciseService.getAllExercises as jest.Mock).mockResolvedValue(mockExercises);
-            mockReq.query = { workoutId: "123" };
-
+    
+            mockReq.params = { workoutId: "123" };
+    
+            (mockRes.locals as any) = {
+                uid: "123",
+                role: "trainer"
+            };
+    
             await exerciseController.getAllExercises(mockReq as Request, mockRes as Response, mockNext);
-
+    
             expect(mockRes.status).toHaveBeenCalledWith(HTTP_STATUS.OK);
             expect(mockRes.json).toHaveBeenCalledWith({
                 status: "success",
@@ -81,39 +90,14 @@ describe("Exercise Controller", () => {
             });
         });
     });
-
-    describe("getExerciseById", () => {
-        it("should handle successful retrieval by ID", async () => {
-            const mockExercise: Exercise = {
-                id: "1",
-                workoutId: "123",
-                name: "Push-up",
-                equipment: ["Mat"],
-                musclesWorked: ["Chest", "Triceps"],
-                intensity: "Medium",
-                sets: 5,
-                reps: 15,
-            };
-
-            (exerciseService.getExerciseById as jest.Mock).mockResolvedValue(mockExercise);
-            mockReq.params = { id: "1" };
-
-            await exerciseController.getExerciseById(mockReq as Request, mockRes as Response, mockNext);
-
-            expect(mockRes.status).toHaveBeenCalledWith(HTTP_STATUS.OK);
-            expect(mockRes.json).toHaveBeenCalledWith({
-                status: "success",
-                message: `Exercise with ID "1" retrieved successfully`,
-                data: mockExercise,
-            });
-        });
-    });
+    
 
     describe("updateExercise", () => {
         it("should handle successful update", async () => {
             const updatedExercise: Exercise = {
                 id: "1",
                 workoutId: "123",
+                userId: "123",
                 name: "Updated Push-up",
                 equipment: ["Updated Mat"],
                 musclesWorked: ["Chest", "Triceps"],
@@ -126,6 +110,7 @@ describe("Exercise Controller", () => {
             mockReq.params = { id: "1" };
             mockReq.body = {
                 name: "Updated Push-up",
+                userId: "123",
                 equipment: ["Updated Mat"],
                 intensity: "High",
                 sets: 5,

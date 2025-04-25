@@ -81,6 +81,7 @@ export type User = {
     id?: string;
     name: string;
     email: string;
+    password?: string;
     role: "Lite" | "Premium" | "Trainer" | "Admin";
     healthMetrics: {
         weight: number;

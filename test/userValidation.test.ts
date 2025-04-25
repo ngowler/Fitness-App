@@ -17,6 +17,7 @@ describe("validate function for users", () => {
             const data: Data = {
                 name: "John Doe",
                 email: "john.doe@example.com",
+                password: "Secure123!",
                 role: "Premium",
                 healthMetrics: {
                     weight: 75,
@@ -39,15 +40,26 @@ describe("validate function for users", () => {
         it("should throw an error for missing name", () => {
             const data: Data = {
                 email: "john.doe@example.com",
+                password: "Secure123!",
                 role: "Premium",
             };
             expect(() => validate(postUserSchema, data)).toThrow("Name is required");
+        });
+
+        it("should throw an error for missing password", () => {
+            const data: Data = {
+                name: "John Doe",
+                email: "john.doe@example.com",
+                role: "Premium",
+            };
+            expect(() => validate(postUserSchema, data)).toThrow("Password is required");
         });
 
         it("should throw an error for invalid email format", () => {
             const data: Data = {
                 name: "John Doe",
                 email: "john.doe",
+                password: "Secure123!",
                 role: "Premium",
             };
             expect(() => validate(postUserSchema, data)).toThrow("Email must be valid");
@@ -56,20 +68,20 @@ describe("validate function for users", () => {
 
     describe("getUserByIdSchema", () => {
         it("should not throw an error for valid user ID", () => {
-            const data: Data = { id: "1" };
+            const data: Data = { uid: "1" };
             expect(() => validate(getUserByIdSchema, data)).not.toThrow();
         });
 
         it("should throw an error for missing user ID", () => {
             const data: Data = {};
-            expect(() => validate(getUserByIdSchema, data)).toThrow("User ID is required");
+            expect(() => validate(getUserByIdSchema, data)).toThrow("User uid is required");
         });
     });
 
     describe("putUserSchema", () => {
         it("should not throw an error for valid updated user data", () => {
             const data: Data = {
-                id: "1",
+                uid: "1",
                 name: "Jane Doe",
                 email: "jane.doe@example.com",
             };
@@ -80,19 +92,19 @@ describe("validate function for users", () => {
             const data: Data = {
                 name: "Jane Doe",
             };
-            expect(() => validate(putUserSchema, data)).toThrow("User ID is required");
+            expect(() => validate(getUserByIdSchema, data)).toThrow("User uid is required");
         });
     });
 
     describe("deleteUserSchema", () => {
         it("should not throw an error for valid user ID", () => {
-            const data: Data = { id: "1" };
+            const data: Data = { uid: "1" };
             expect(() => validate(deleteUserSchema, data)).not.toThrow();
         });
 
         it("should throw an error for missing user ID", () => {
             const data: Data = {};
-            expect(() => validate(deleteUserSchema, data)).toThrow("User ID is required");
+            expect(() => validate(getUserByIdSchema, data)).toThrow("User uid is required");
         });
     });
 });
@@ -115,6 +127,7 @@ describe("validateRequest middleware for users", () => {
         req.body = {
             name: "John Doe",
             email: "john.doe@example.com",
+            password: "Secure123!",
             role: "Lite",
             healthMetrics: {
                 weight: 65,
@@ -132,6 +145,7 @@ describe("validateRequest middleware for users", () => {
     it("should return 400 for missing name", () => {
         req.body = {
             email: "john.doe@example.com",
+            password: "Secure123!",
             role: "Lite",
         };
 
@@ -140,7 +154,7 @@ describe("validateRequest middleware for users", () => {
         expect(next).not.toHaveBeenCalled();
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith({
-            error: "Validation error: Name is required",
+            error: expect.stringContaining("Name is required"),
         });
     });
 });

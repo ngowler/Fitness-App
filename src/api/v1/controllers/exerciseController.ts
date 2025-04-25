@@ -25,21 +25,22 @@ export const createExercise = async (
     }
 };
 
-/**
- * @description Get all exercises for a specific workout.
- * @route GET /exercise/
- * @returns {Promise<void>}
- */
 export const getAllExercises = async (
     req: Request,
     res: Response,
     next: NextFunction
 ): Promise<void> => {
     try {
-        const { workoutId } = req.query;
-
-        const exercises: Exercise[] = await exerciseService.getAllExercises(workoutId as string);
-
+        const workoutId: string | undefined = req.params.workoutId?.trim() || undefined;
+        const userId: string = res.locals.uid;
+        const userRole: string = res.locals.role;
+  
+        const exercises = await exerciseService.getAllExercises(
+            workoutId,
+            userId,
+            userRole
+        );
+  
         res.status(HTTP_STATUS.OK).json(
             successResponse(exercises, "Exercises Retrieved")
         );
@@ -47,33 +48,7 @@ export const getAllExercises = async (
         next(error);
     }
 };
-
-/**
- * @description Get a specific exercise by ID.
- * @route GET /exercise/:id
- * @returns {Promise<void>}
- */
-export const getExerciseById = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-): Promise<void> => {
-    try {
-        const { id } = req.params;
-
-        const exercise: Exercise = await exerciseService.getExerciseById(id);
-
-        res.status(HTTP_STATUS.OK).json(
-            successResponse(
-                exercise,
-                `Exercise with ID "${id}" retrieved successfully`
-            )
-        );
-    } catch (error) {
-        next(error);
-    }
-};
-
+  
 /**
  * @description Update an exercise in a workout.
  * @route PUT /exercise/:id

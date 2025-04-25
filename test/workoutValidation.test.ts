@@ -19,21 +19,12 @@ describe("validate function for workouts", () => {
                 name: "Morning Workout",
                 description: "A quick workout to start the day",
                 date: "2025-04-06T08:30:00Z",
-                exercises: [
-                    {
-                        name: "Push-Up",
-                        equipment: ["None"],
-                        musclesWorked: ["Chest", "Triceps"],
-                        intensity: "Medium",
-                        sets: 3,
-                        reps: 15,
-                    },
-                ],
+                exerciseLibraryIds: ["lib1", "lib2"],
             };
             expect(() => validate(postWorkoutSchema, data)).not.toThrow();
         });
 
-        it("should throw an error for missing userId", () => {
+        it("should throw an error for missing required fields", () => {
             const data: Data = {
                 date: "2025-04-06T08:30:00Z",
                 exercises: [
@@ -47,16 +38,19 @@ describe("validate function for workouts", () => {
                     },
                 ],
             };
-            expect(() => validate(postWorkoutSchema, data)).toThrow("Validation error: Workout name is required");
+            expect(() => validate(postWorkoutSchema, data)).toThrow(
+                /Workout name is required.*Exercise Library IDs are required.*"exercises" is not allowed/
+            );
         });
 
-        it("should throw an error for missing exercises", () => {
+        it("should throw an error for missing exercises and library IDs", () => {
             const data: Data = {
-                userId: "1",
                 name: "Morning Workout",
                 date: "2025-04-06T08:30:00Z",
             };
-            expect(() => validate(postWorkoutSchema, data)).toThrow("Exercises are required");
+            expect(() => validate(postWorkoutSchema, data)).toThrow(
+                /Exercise Library IDs are required/
+            );
         });
     });
 
@@ -133,16 +127,7 @@ describe("validateRequest middleware for workouts", () => {
         req.body = {
             name: "Morning Workout",
             date: "2025-04-06T08:30:00Z",
-            exercises: [
-                {
-                    name: "Push-Up",
-                    equipment: ["None"],
-                    musclesWorked: ["Chest", "Triceps"],
-                    intensity: "Medium",
-                    sets: 3,
-                    reps: 15,
-                },
-            ],
+            exerciseLibraryIds: ["abc123"],
         };
 
         validateRequest(postWorkoutSchema)(req as Request, res as Response, next);
@@ -152,7 +137,7 @@ describe("validateRequest middleware for workouts", () => {
         expect(res.json).not.toHaveBeenCalled();
     });
 
-    it("should return 400 for missing userId", () => {
+    it("should return 400 for missing name and exerciseLibraryIds", () => {
         req.body = {
             date: "2025-04-06T08:30:00Z",
             exercises: [
@@ -172,7 +157,7 @@ describe("validateRequest middleware for workouts", () => {
         expect(next).not.toHaveBeenCalled();
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith({
-            error: "Validation error: Workout name is required",
+            error: expect.stringMatching(/Workout name is required.*Exercise Library IDs are required.*"exercises" is not allowed/),
         });
     });
 

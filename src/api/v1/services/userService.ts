@@ -7,6 +7,7 @@ import {
 import { User } from "../models/userModel";
 import { ServiceError } from "../errors/errors";
 import { getErrorMessage, getErrorCode } from "../utils/errorUtils";
+import { auth, db } from "../../../../config/firebaseConfig";
 
 const COLLECTION: string = "users";
 
@@ -17,8 +18,23 @@ const COLLECTION: string = "users";
  */
 export const createUser = async (userData: Partial<User>): Promise<User> => {
     try {
-        const id: string = await createDocument(COLLECTION, userData);
-        return { id, ...userData } as User;
+        const userRecord = await auth.createUser({
+            email: userData.email!,
+            password: userData.password!,
+        });
+
+        const uid: string = userRecord.uid;
+
+        const customClaims = {
+            role: userData.role || "Lite",
+        };
+        await auth.setCustomUserClaims(uid, customClaims);
+
+        const { password, ...userDataWithoutPassword } = userData;
+        const userRef = db.collection("users").doc(uid);
+        await userRef.set({ ...userDataWithoutPassword, id: uid });
+
+        return { id: uid, ...userDataWithoutPassword } as User;
     } catch (error: unknown) {
         throw new ServiceError(
             `Failed to create user: ${getErrorMessage(error)}`,

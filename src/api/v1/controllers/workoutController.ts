@@ -16,14 +16,17 @@ export const createWorkout = async (
 ): Promise<void> => {
     try {
         const userId: string = res.locals.uid;
+        const { name, description, exerciseLibraryIds } = req.body;
 
-        const { workoutData, exerciseLibraryIds } = req.body;
+        const workoutDate: string = new Date().toISOString();
 
-        const newWorkout: Workout = await workoutService.createWorkout(workoutData, userId, exerciseLibraryIds);
-
-        res.status(HTTP_STATUS.CREATED).json(
-            successResponse(newWorkout, "Workout Created")
+        const newWorkout: Workout = await workoutService.createWorkout(
+            { name, description, date: workoutDate },
+            userId,
+            exerciseLibraryIds
         );
+
+        res.status(HTTP_STATUS.CREATED).json(successResponse(newWorkout, "Workout Created"));
     } catch (error) {
         next(error);
     }

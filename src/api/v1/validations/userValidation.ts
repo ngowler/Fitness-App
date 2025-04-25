@@ -10,6 +10,10 @@ export const postUserSchema: ObjectSchema = Joi.object({
         "string.empty": "Email cannot be empty",
         "string.email": "Email must be valid",
     }),
+    password: Joi.string().min(6).required().messages({
+        "any.required": "Password is required",
+        "string.min": "Password must be at least 6 characters long",
+    }),
     role: Joi.string()
         .valid("Lite", "Premium", "Trainer", "Admin")
         .required()
@@ -58,16 +62,16 @@ export const postUserSchema: ObjectSchema = Joi.object({
 });
 
 export const getUserByIdSchema: ObjectSchema = Joi.object({
-    id: Joi.string().required().messages({
-        "any.required": "User ID is required",
-        "string.empty": "User ID cannot be empty",
+    uid: Joi.string().required().messages({
+        "any.required": "User uid is required",
+        "string.empty": "User uid cannot be empty",
     }),
 });
 
 export const putUserSchema: ObjectSchema = Joi.object({
-    id: Joi.string().required().messages({
-        "any.required": "User ID is required",
-        "string.empty": "User ID cannot be empty",
+    uid: Joi.string().required().messages({
+        "any.required": "User uid is required",
+        "string.empty": "User uid cannot be empty",
     }),
     name: Joi.string().optional().messages({
         "string.empty": "Name cannot be empty",
@@ -75,6 +79,7 @@ export const putUserSchema: ObjectSchema = Joi.object({
     email: Joi.string().email().optional().messages({
         "string.email": "Email must be valid",
     }),
+
     role: Joi.string()
         .valid("Lite", "Premium", "Trainer", "Admin")
         .optional()
@@ -101,8 +106,8 @@ export const putUserSchema: ObjectSchema = Joi.object({
 });
 
 export const deleteUserSchema: ObjectSchema = Joi.object({
-    id: Joi.string().required().messages({
-        "any.required": "User ID is required",
-        "string.empty": "User ID cannot be empty",
+    uid: Joi.string().required().messages({
+        "any.required": "User uid is required",
+        "string.empty": "User uid cannot be empty",
     }),
 });

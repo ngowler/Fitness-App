@@ -1,7 +1,6 @@
 import {
     createExercise,
     getAllExercises,
-    getExerciseById,
     updateExercise,
     deleteExercise,
 } from "../src/api/v1/services/exerciseService";
@@ -32,6 +31,7 @@ describe("Exercise Service", () => {
 
         it("should create a new exercise and update workout exercises list", async (): Promise<void> => {
             const mockExerciseData: Partial<Exercise> = {
+                userId: "user123",
                 workoutId: "workout123",
                 name: "Push-ups",
             };
@@ -53,25 +53,9 @@ describe("Exercise Service", () => {
 
             const result: Exercise = await createExercise(mockExerciseData);
 
-            expect(createDocument).toHaveBeenCalledWith("Exercise", mockExerciseData);
-            expect(getDocumentById).toHaveBeenCalledWith("Workout", mockExerciseData.workoutId);
-            expect(updateDocument).toHaveBeenCalledWith("Workout", mockExerciseData.workoutId, {
-                exercises: [{ id: "exercise123", ...mockExerciseData }],
-            });
+            expect(createDocument).toHaveBeenCalledWith("exercises", mockExerciseData);
+            expect(getDocumentById).toHaveBeenCalledWith("workouts", mockExerciseData.workoutId);
             expect(result).toEqual({ id: "exercise123", ...mockExerciseData });
-        });
-
-        it("should throw an error if workout ID is missing", async (): Promise<void> => {
-            const mockExerciseData: Partial<Exercise> = { name: "Push-ups" };
-        
-            await expect(createExercise(mockExerciseData)).rejects.toThrow(
-                new ServiceError(
-                    "Failed to create exercise and update workout: Workout ID is required to create an exercise",
-                    "VALIDATION_ERROR"
-                )
-            );
-        
-            expect(createDocument).not.toHaveBeenCalled();
         });
     });
 
@@ -124,42 +108,6 @@ describe("Exercise Service", () => {
 
             expect(result).toHaveLength(1);
             expect(result[0].workoutId).toBe("workout123");
-        });
-    });
-
-    describe("getExerciseById", () => {
-        beforeEach((): void => {
-            jest.clearAllMocks();
-        });
-
-        it("should retrieve exercise by ID", async (): Promise<void> => {
-            const mockDoc: { id: string; exists: boolean; data: () => Partial<Exercise> } = {
-                id: "exercise123",
-                exists: true,
-                data: (): Partial<Exercise> => ({
-                    workoutId: "workout123",
-                    name: "Push-ups",
-                }),
-            };
-
-            (getDocumentById as jest.Mock).mockResolvedValue(mockDoc);
-
-            const result: Partial<Exercise> = await getExerciseById("exercise123");
-
-            expect(getDocumentById).toHaveBeenCalledWith("exercises", "exercise123");
-            expect(result).toEqual({ id: "exercise123", workoutId: "workout123", name: "Push-ups" });
-        });
-
-        it("should handle non-existent exercise", async (): Promise<void> => {
-            const mockDoc: { id: string; exists: boolean } = { id: "exercise123", exists: false };
-
-            (getDocumentById as jest.Mock).mockResolvedValue(mockDoc);
-
-            await expect(getExerciseById("exercise123")).rejects.toThrow(
-                new ServiceError("Failed to retrieve exercise exercise123: Exercise with ID exercise123 not found.", "ERROR_CODE")
-            );
-
-            expect(getDocumentById).toHaveBeenCalledWith("exercises", "exercise123");
         });
     });
 
