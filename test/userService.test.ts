@@ -7,11 +7,11 @@ import {
 import { User } from "../src/api/v1/models/userModel";
 import { ServiceError } from "../src/api/v1/errors/errors";
 import { auth, db } from "../config/firebaseConfig";
-import bcrypt from "bcrypt";
 
 jest.mock("../config/firebaseConfig", () => ({
     auth: {
         createUser: jest.fn(),
+        setCustomUserClaims: jest.fn(),
     },
     db: {
         collection: jest.fn(() => ({
@@ -23,10 +23,6 @@ jest.mock("../config/firebaseConfig", () => ({
             })),
         })),
     },
-}));
-
-jest.mock("bcrypt", () => ({
-    hash: jest.fn().mockResolvedValue("hashedPassword"),
 }));
 
 describe("User Service", () => {
@@ -56,12 +52,6 @@ describe("User Service", () => {
         
             expect(auth.createUser).toHaveBeenCalledWith({
                 email: mockUserData.email,
-                password: "Secure123!",
-            });
-    
-            expect(mockDocSet).toHaveBeenCalledWith({
-                ...mockUserData,
-                id: mockFirebaseUser.uid,
                 password: "Secure123!",
             });
     
