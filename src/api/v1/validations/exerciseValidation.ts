@@ -1,8 +1,7 @@
 import Joi, { ObjectSchema } from "joi";
 
 export const postExerciseSchema: ObjectSchema = Joi.object({
-    workoutId: Joi.string().required().messages({
-        "any.required": "Workout ID is required",
+    workoutId: Joi.string().optional().messages({
         "string.empty": "Workout ID cannot be empty",
     }),
     name: Joi.string().required().messages({
@@ -24,17 +23,20 @@ export const postExerciseSchema: ObjectSchema = Joi.object({
             "any.required": "Intensity is required",
             "any.only": "Intensity must be 'Low', 'Medium', or 'High'",
         }),
-    sets: Joi.number().optional().messages({
+    sets: Joi.number().integer().min(0).optional().default(0).messages({
         "number.base": "Sets must be a number",
+        "number.integer": "Sets must be an integer",
+        "number.min": "Sets must be a positive number or zero",
     }),
-    reps: Joi.number().optional().messages({
+    reps: Joi.number().integer().min(0).optional().default(0).messages({
         "number.base": "Reps must be a number",
+        "number.integer": "Reps must be an integer",
+        "number.min": "Reps must be a positive number or zero",
     }),
 });
 
 export const getExercisesByWorkoutSchema: ObjectSchema = Joi.object({
-    workoutId: Joi.string().required().messages({
-        "any.required": "Workout ID is required",
+    workoutId: Joi.string().optional().messages({
         "string.empty": "Workout ID cannot be empty",
     }),
 });
@@ -69,11 +71,15 @@ export const putExerciseSchema: ObjectSchema = Joi.object({
         .messages({
             "any.only": "Intensity must be 'Low', 'Medium', or 'High'",
         }),
-    sets: Joi.number().optional().messages({
+    sets: Joi.number().integer().min(0).optional().default(0).messages({
         "number.base": "Sets must be a number",
+        "number.integer": "Sets must be an integer",
+        "number.min": "Sets must be a positive number or zero",
     }),
-    reps: Joi.number().optional().messages({
+    reps: Joi.number().integer().min(0).optional().default(0).messages({
         "number.base": "Reps must be a number",
+        "number.integer": "Reps must be an integer",
+        "number.min": "Reps must be a positive number or zero",
     }),
 });
 

@@ -4,7 +4,6 @@ import isAuthorized from "../middleware/authorize";
 import {
     createExercise,
     getAllExercises,
-    getExerciseById,
     updateExercise,
     deleteExercise,
 } from "../controllers/exerciseController";
@@ -12,7 +11,6 @@ import { validateRequest } from "../middleware/validate";
 import {
     postExerciseSchema,
     getExercisesByWorkoutSchema,
-    getExerciseByIdSchema,
     putExerciseSchema,
     deleteExerciseSchema,
 } from "../validations/exerciseValidation";
@@ -53,28 +51,29 @@ const router: Router = express.Router();
 router.post(
     "/",
     authenticate,
-    isAuthorized({ hasRole: ["lite", "premium", "trainer"] }),
+    isAuthorized({ allowSameUser: true, hasRole: ["trainer"] }),
     validateRequest(postExerciseSchema),
     createExercise
 );
 
 /**
- * @route GET /exercise
- * @description Retrieve all exercises for a specific workout.
+ * @route GET /exercise/:workoutId
+ * @description Retrieve all exercises for a specific workout by workout ID.
  * 
  * @openapi
- * /exercise:
+ * /exercise/{workoutId}:
  *   get:
- *     summary: Get all exercises
+ *     summary: Retrieve all exercises in a workout
  *     tags: [Exercise]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: query
+ *       - in: path
  *         name: workoutId
+ *         required: true
  *         schema:
  *           type: string
- *         description: Filter exercises by workout ID
+ *         description: The ID of the workout to retrieve exercises for
  *     responses:
  *       200:
  *         description: Exercises retrieved successfully
@@ -86,55 +85,17 @@ router.post(
  *                 $ref: '#/components/schemas/Exercise'
  *       401:
  *         description: Unauthorized access
+ *       403:
+ *         description: Forbidden due to insufficient permissions
  *       500:
  *         description: Server error
  */
 router.get(
-    "/",
+    "/:workoutId?",
     authenticate,
-    isAuthorized({ hasRole: ["lite", "premium", "trainer"] }),
+    isAuthorized({ allowSameUser: true, hasRole: ["trainer"] }),
     validateRequest(getExercisesByWorkoutSchema),
     getAllExercises
-);
-
-/**
- * @route GET /exercise/{id}
- * @description Retrieve details of a specific exercise by ID.
- * 
- * @openapi
- * /exercise/{id}:
- *   get:
- *     summary: Get a specific exercise
- *     tags: [Exercise]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: The ID of the exercise to retrieve
- *     responses:
- *       200:
- *         description: Exercise retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Exercise'
- *       404:
- *         description: Exercise not found
- *       401:
- *         description: Unauthorized access
- *       500:
- *         description: Server error
- */
-router.get(
-    "/:id",
-    authenticate,
-    isAuthorized({ hasRole: ["lite", "premium", "trainer"] }),
-    validateRequest(getExerciseByIdSchema),
-    getExerciseById
 );
 
 /**
@@ -176,7 +137,7 @@ router.get(
 router.put(
     "/:id",
     authenticate,
-    isAuthorized({ hasRole: ["lite", "premium", "trainer"] }),
+    isAuthorized({ allowSameUser: true, hasRole: ["trainer"] }),
     validateRequest(putExerciseSchema),
     updateExercise
 );
@@ -212,7 +173,7 @@ router.put(
 router.delete(
     "/:id",
     authenticate,
-    isAuthorized({ hasRole: ["lite", "premium", "trainer"] }),
+    isAuthorized({ allowSameUser: true, hasRole: ["trainer"] }),
     validateRequest(deleteExerciseSchema),
     deleteExercise
 );

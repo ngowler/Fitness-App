@@ -14,6 +14,9 @@
  *         workoutId:
  *           type: string
  *           description: The unique identifier for the workout associated with the exercise.
+ *         userId:
+ *           type: string
+ *           description: The unique identifier for the user associated with the exercise.
  *         name:
  *           type: string
  *           description: The name of the exercise.
@@ -43,7 +46,8 @@
  */
 export type Exercise = {
     id?: string;
-    workoutId: string;
+    workoutId?: string;
+    userId: string;
     name: string;
     equipment: string[];
     musclesWorked: string[];

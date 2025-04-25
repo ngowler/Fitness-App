@@ -16,29 +16,21 @@ export const createWorkout = async (
 ): Promise<void> => {
     try {
         const userId: string = res.locals.uid;
+        const { name, description, exerciseLibraryIds } = req.body;
 
-        // Extract required data from the request
-        const { name, description, date, exerciseLibraryIds } = req.body;
-
-        // Validate required fields
-        if (!name || !date || !exerciseLibraryIds || !Array.isArray(exerciseLibraryIds)) {
-            throw new Error("Invalid request data. Name, date, and exerciseLibraryIds are required.");
-        }
+        const workoutDate: string = new Date().toISOString();
 
         const newWorkout: Workout = await workoutService.createWorkout(
-            { name, description, date },
+            { name, description, date: workoutDate },
             userId,
             exerciseLibraryIds
         );
 
-        res.status(HTTP_STATUS.CREATED).json(
-            successResponse(newWorkout, "Workout Created")
-        );
+        res.status(HTTP_STATUS.CREATED).json(successResponse(newWorkout, "Workout Created"));
     } catch (error) {
         next(error);
     }
 };
-
 
 /**
  * @description Retrieve all workouts for the authenticated user.

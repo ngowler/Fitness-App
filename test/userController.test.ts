@@ -64,7 +64,7 @@ describe("User Controller", () => {
             };
 
             (userService.getUserById as jest.Mock).mockResolvedValue(mockUser);
-            mockReq.params = { id: "1" };
+            mockReq.params = { uid: "1" };
 
             await userController.getUserById(mockReq as Request, mockRes as Response, mockNext);
 

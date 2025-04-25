@@ -30,6 +30,7 @@ describe("Workout Controller", () => {
                     {
                         id: "101",
                         name: "Squat",
+                        userId: "123",
                         equipment: ["Barbell"],
                         musclesWorked: ["Legs", "Glutes"],
                         intensity: "High",
@@ -52,6 +53,7 @@ describe("Workout Controller", () => {
                             {
                                 id: "101",
                                 name: "Squat",
+                                userId: "123",
                                 equipment: ["Barbell"],
                                 musclesWorked: ["Legs", "Glutes"],
                                 intensity: "High",
@@ -87,6 +89,7 @@ describe("Workout Controller", () => {
                         {
                             id: "101",
                             name: "Squat",
+                            userId: "123",
                             equipment: ["Barbell"],
                             musclesWorked: ["Legs", "Glutes"],
                             intensity: "High",
@@ -133,6 +136,7 @@ describe("Workout Controller", () => {
                     {
                         id: "101",
                         name: "Squat",
+                        userId: "123",
                         equipment: ["Barbell"],
                         musclesWorked: ["Legs", "Glutes"],
                         intensity: "High",
@@ -169,6 +173,7 @@ describe("Workout Controller", () => {
                     {
                         id: "101",
                         name: "Squat",
+                        userId: "123",
                         equipment: ["Barbell"],
                         musclesWorked: ["Legs", "Glutes"],
                         intensity: "High",
@@ -189,6 +194,7 @@ describe("Workout Controller", () => {
                     {
                         id: "101",
                         name: "Squat",
+                        userId: "123",
                         equipment: ["Barbell"],
                         musclesWorked: ["Legs", "Glutes"],
                         intensity: "High",

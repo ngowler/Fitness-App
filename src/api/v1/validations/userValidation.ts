@@ -15,11 +15,11 @@ export const postUserSchema: ObjectSchema = Joi.object({
         "string.min": "Password must be at least 6 characters long",
     }),
     role: Joi.string()
-        .valid("lite", "premium", "trainer", "admin")
+        .valid("Lite", "Premium", "Trainer", "Admin")
         .required()
         .messages({
             "any.required": "Role is required",
-            "any.only": "Role must be one of 'lite', 'premium', 'trainer', or 'admin'",
+            "any.only": "Role must be one of 'Lite', 'Premium', 'Trainer', or 'Admin'",
         }),
     healthMetrics: Joi.object({
         weight: Joi.number().positive().required().messages({
@@ -62,16 +62,16 @@ export const postUserSchema: ObjectSchema = Joi.object({
 });
 
 export const getUserByIdSchema: ObjectSchema = Joi.object({
-    id: Joi.string().required().messages({
-        "any.required": "User ID is required",
-        "string.empty": "User ID cannot be empty",
+    uid: Joi.string().required().messages({
+        "any.required": "User uid is required",
+        "string.empty": "User uid cannot be empty",
     }),
 });
 
 export const putUserSchema: ObjectSchema = Joi.object({
-    id: Joi.string().required().messages({
-        "any.required": "User ID is required",
-        "string.empty": "User ID cannot be empty",
+    uid: Joi.string().required().messages({
+        "any.required": "User uid is required",
+        "string.empty": "User uid cannot be empty",
     }),
     name: Joi.string().optional().messages({
         "string.empty": "Name cannot be empty",
@@ -79,11 +79,9 @@ export const putUserSchema: ObjectSchema = Joi.object({
     email: Joi.string().email().optional().messages({
         "string.email": "Email must be valid",
     }),
-    password: Joi.string().min(6).optional().messages({
-        "string.min": "Password must be at least 6 characters long",
-    }),
+
     role: Joi.string()
-        .valid("lite", "premium", "trainer", "admin")
+        .valid("Lite", "Premium", "Trainer", "Admin")
         .optional()
         .messages({
             "any.only": "Role must be one of 'Lite', 'Premium', 'Trainer', or 'Admin'",
@@ -108,8 +106,8 @@ export const putUserSchema: ObjectSchema = Joi.object({
 });
 
 export const deleteUserSchema: ObjectSchema = Joi.object({
-    id: Joi.string().required().messages({
-        "any.required": "User ID is required",
-        "string.empty": "User ID cannot be empty",
+    uid: Joi.string().required().messages({
+        "any.required": "User uid is required",
+        "string.empty": "User uid cannot be empty",
     }),
 });
