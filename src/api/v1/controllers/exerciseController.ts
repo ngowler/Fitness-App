@@ -29,25 +29,25 @@ export const getAllExercises = async (
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> => {
+): Promise<void> => {
     try {
         let workoutId: string | undefined = req.params.workoutId?.trim() || undefined;
         const userId: string = res.locals.uid;
         const userRole: string = res.locals.role;
   
-      const exercises = await exerciseService.getAllExercises(
-        workoutId,
-        userId,
-        userRole
-      );
+        const exercises = await exerciseService.getAllExercises(
+            workoutId,
+            userId,
+            userRole
+        );
   
-      res.status(HTTP_STATUS.OK).json(
-        successResponse(exercises, "Exercises Retrieved")
-      );
+        res.status(HTTP_STATUS.OK).json(
+            successResponse(exercises, "Exercises Retrieved")
+        );
     } catch (error) {
-      next(error);
+        next(error);
     }
-  };
+};
   
 /**
  * @description Update an exercise in a workout.

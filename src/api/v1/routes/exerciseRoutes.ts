@@ -11,7 +11,6 @@ import { validateRequest } from "../middleware/validate";
 import {
     postExerciseSchema,
     getExercisesByWorkoutSchema,
-    getExerciseByIdSchema,
     putExerciseSchema,
     deleteExerciseSchema,
 } from "../validations/exerciseValidation";

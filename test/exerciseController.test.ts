@@ -70,12 +70,18 @@ describe("Exercise Controller", () => {
                     reps: 15,
                 },
             ];
-
+    
             (exerciseService.getAllExercises as jest.Mock).mockResolvedValue(mockExercises);
-            mockReq.query = { workoutId: "123" };
-
+    
+            mockReq.params = { workoutId: "123" };
+    
+            (mockRes.locals as any) = {
+                uid: "123",
+                role: "trainer"
+            };
+    
             await exerciseController.getAllExercises(mockReq as Request, mockRes as Response, mockNext);
-
+    
             expect(mockRes.status).toHaveBeenCalledWith(HTTP_STATUS.OK);
             expect(mockRes.json).toHaveBeenCalledWith({
                 status: "success",
@@ -84,6 +90,7 @@ describe("Exercise Controller", () => {
             });
         });
     });
+    
 
     describe("updateExercise", () => {
         it("should handle successful update", async () => {
