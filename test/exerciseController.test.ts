@@ -23,6 +23,7 @@ describe("Exercise Controller", () => {
             const mockNewExercise: Exercise = {
                 id: "1",
                 workoutId: "123",
+                userId: "123",
                 name: "Push-up",
                 equipment: ["Mat"],
                 musclesWorked: ["Chest", "Triceps"],
@@ -34,6 +35,7 @@ describe("Exercise Controller", () => {
             (exerciseService.createExercise as jest.Mock).mockResolvedValue(mockNewExercise);
             mockReq.body = {
                 workoutId: "123",
+                userId: "123",
                 name: "Push-up",
                 equipment: ["Mat"],
                 musclesWorked: ["Chest", "Triceps"],
@@ -59,6 +61,7 @@ describe("Exercise Controller", () => {
                 {
                     id: "1",
                     workoutId: "123",
+                    userId: "123",
                     name: "Push-up",
                     equipment: ["Mat"],
                     musclesWorked: ["Chest", "Triceps"],
@@ -87,6 +90,7 @@ describe("Exercise Controller", () => {
             const mockExercise: Exercise = {
                 id: "1",
                 workoutId: "123",
+                userId: "123",
                 name: "Push-up",
                 equipment: ["Mat"],
                 musclesWorked: ["Chest", "Triceps"],
@@ -114,6 +118,7 @@ describe("Exercise Controller", () => {
             const updatedExercise: Exercise = {
                 id: "1",
                 workoutId: "123",
+                userId: "123",
                 name: "Updated Push-up",
                 equipment: ["Updated Mat"],
                 musclesWorked: ["Chest", "Triceps"],
@@ -126,6 +131,7 @@ describe("Exercise Controller", () => {
             mockReq.params = { id: "1" };
             mockReq.body = {
                 name: "Updated Push-up",
+                userId: "123",
                 equipment: ["Updated Mat"],
                 intensity: "High",
                 sets: 5,

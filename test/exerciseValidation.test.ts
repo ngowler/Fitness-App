@@ -121,7 +121,7 @@ describe("validateRequest middleware for exercises", () => {
         next = jest.fn();
     });
 
-    it("should not throw an error for valid postExerciseSchema data", () => {
+    it("should not return an error for valid postExerciseSchema data", () => {
         req.body = {
             workoutId: "1",
             name: "Bench Press",
@@ -147,14 +147,10 @@ describe("validateRequest middleware for exercises", () => {
 
         validateRequest(postExerciseSchema)(req as Request, res as Response, next);
 
-        expect(next).not.toHaveBeenCalled();
-        expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith({
-            error: "Validation error: Workout ID is required",
-        });
+        expect(next).toHaveBeenCalled();
     });
 
-    it("should not throw an error for valid deleteExerciseSchema data", () => {
+    it("should not return an error for valid deleteExerciseSchema data", () => {
         req.params = { id: "1" };
 
         validateRequest(deleteExerciseSchema)(req as Request, res as Response, next);
