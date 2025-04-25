@@ -6,56 +6,45 @@ import {
     getDocumentById,
 } from "../repositories/firestoreRepository";
 import { Exercise } from "../models/exerciseModel";
-import { Workout } from "../models/workoutModel";
 import { ServiceError } from "../errors/errors";
 import { getErrorMessage, getErrorCode } from "../utils/errorUtils";
 
 const COLLECTION: string = "exercises";
 
 /**
- * Create a new exercise for a workout and update the workout's exercises list.
- * Ensures the workout belongs to the authenticated user.
+ * Create a new exercise given the request data.
+ * The exercise must include a workoutId and userId,
+ * so that it is tied to a specific workout and user.
  * @param {Partial<Exercise>} exerciseData - The data for the new exercise.
  * @returns {Promise<Exercise>}
  */
 export const createExercise = async (
     exerciseData: Partial<Exercise>
-): Promise<Exercise> => {
+  ): Promise<Exercise> => {
     try {
-        if (!exerciseData.workoutId) {
-            throw new Error("Workout ID is required to create an exercise.");
-        }
-
-        const workoutSnapshot: FirebaseFirestore.DocumentSnapshot = await getDocumentById(
-            "workouts",
-            exerciseData.workoutId
-        );
-
-        if (!workoutSnapshot.exists) {
-            throw new Error(`Workout with ID ${exerciseData.workoutId} not found.`);
-        }
-
-        const workoutData: Workout = workoutSnapshot.data() as Workout;
-
-        if (workoutData.userId !== exerciseData.userId) {
-            throw new Error(`User does not own the workout with ID ${exerciseData.workoutId}.`);
-        }
-
-        const exerciseId: string = await createDocument(COLLECTION, exerciseData);
-        const newExercise: Exercise = { id: exerciseId, ...exerciseData } as Exercise;
-
-        const updatedExercises: Exercise[] = [...(workoutData.exercises || []), newExercise];
-
-        await updateDocument("workouts", exerciseData.workoutId, { exercises: updatedExercises });
-
-        return newExercise;
+      if (!exerciseData.workoutId) {
+        throw new Error("Workout ID is required to create an exercise.");
+      }
+      if (!exerciseData.userId) {
+        throw new Error("User ID is required to create an exercise.");
+      }
+  
+      const workoutSnapshot = await getDocumentById("workouts", exerciseData.workoutId);
+      if (!workoutSnapshot.exists) {
+        throw new Error(`Workout with ID ${exerciseData.workoutId} not found.`);
+      }
+  
+      const exerciseId: string = await createDocument(COLLECTION, exerciseData);
+      const newExercise: Exercise = { id: exerciseId, ...exerciseData } as Exercise;
+    
+      return newExercise;
     } catch (error: unknown) {
-        throw new ServiceError(
-            `Failed to create exercise and update workout: ${getErrorMessage(error)}`,
-            getErrorCode(error)
-        );
+      throw new ServiceError(
+        `Failed to create exercise: ${getErrorMessage(error)}`,
+        getErrorCode(error)
+      );
     }
-};
+  };
 
 /**
  * Get all exercises for a specific workout.

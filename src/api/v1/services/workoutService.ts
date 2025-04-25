@@ -15,96 +15,112 @@ import { getErrorMessage, getErrorCode } from "../utils/errorUtils";
 const COLLECTION: string = "workouts";
 
 /**
- * Automatically generate a workout and populate it with exercises from the library.
- * @param {Partial<Workout>} workoutData - The data for the new workout (e.g., name, description).
+ * Options for selecting exercises from the exercise library.
+ */
+type ExerciseSelectionOptions =
+  | { mode: "random"; count: number }
+  | { mode: "selected"; exerciseLibraryIds: string[] };
+
+/**
+ * Create a new workout. Two options are supported for adding exercises:
+ * 1. Random generation: randomly pick a given number of exercises from the exercise library.
+ * 2. Selection: use the specific exerciseLibraryIds provided.
+ *
+ * After selecting the desired library exercises, create an exercise document for each,
+ * ensuring each new exercise is tied to the workout (via workoutId) and the user (via userId),
+ * then update the workout with the list of created exercises.
+ *
+ * @param {Partial<Workout>} workoutData - The basic data for the new workout (name, date, description, etc.).
  * @param {string} userId - The ID of the authenticated user creating the workout.
- * @param {number} numberOfExercises - The number of exercises to include in the workout.
+ * @param {ExerciseSelectionOptions} options - Specifies how to pick exercises from the library.
  * @returns {Promise<Workout>}
- * @throws {ServiceError} Throws an error if any operation fails.
  */
 export const createWorkout = async (
-    workoutData: Partial<Workout>,
-    userId: string,
-    exerciseLibraryIds: string[]
+  workoutData: Partial<Workout>,
+  userId: string,
+  options: ExerciseSelectionOptions
 ): Promise<Workout> => {
-    try {
-        // Validate required fields
-        if (!userId) {
-            throw new Error("User ID is required to create a workout.");
-        }
-
-        if (!workoutData.name) {
-            throw new Error("Workout name is required.");
-        }
-
-        if (!workoutData.date) {
-            throw new Error("Workout date is required.");
-        }
-
-        // Create the workout document first to get a valid workoutId
-        const workoutWithUserId: Partial<Workout> = {
-            userId,
-            name: workoutData.name,
-            description: workoutData.description,
-            date: workoutData.date,
-            exercises: [], // Placeholder exercises
-        };
-
-        const workoutId: string = await createDocument("Workouts", workoutWithUserId);
-        console.log(`Workout created with ID: ${workoutId}`);
-
-        // Double-check workout existence to ensure Firestore consistency
-        const workoutSnapshot = await getDocumentById("Workouts", workoutId);
-        if (!workoutSnapshot.exists) {
-            throw new Error(`Workout with ID ${workoutId} not found after creation.`);
-        }
-
-        // Fetch exercises from ExerciseLibrary using the provided IDs
-        const exercisesSnapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData> =
-            await getDocuments("exercise-library");
-        const allExercises: ExerciseLibrary[] = exercisesSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-        })) as ExerciseLibrary[];
-
-        const selectedExercises: ExerciseLibrary[] = exerciseLibraryIds
-            .map((id) => allExercises.find((exercise) => exercise.id === id))
-            .filter((exercise): exercise is ExerciseLibrary => !!exercise);
-
-        if (selectedExercises.length === 0) {
-            throw new Error("No exercises found for the provided IDs.");
-        }
-
-        // Create exercises and associate them with the workout
-        const workoutExercises: Exercise[] = await Promise.all(
-            selectedExercises.map(async (exercise) => {
-                return await createExercise({
-                    name: exercise.name,
-                    equipment: exercise.equipment,
-                    musclesWorked: exercise.musclesWorked,
-                    intensity: exercise.intensity,
-                    workoutId, // Pass the confirmed workoutId
-                    sets: 4,
-                    reps: 12,
-                });
-            })
-        );
-
-        // Update the workout document with the created exercises
-        await updateDocument("Workouts", workoutId, { exercises: workoutExercises });
-
-        // Return the complete workout
-        return {
-            id: workoutId,
-            ...workoutWithUserId,
-            exercises: workoutExercises,
-        } as Workout;
-    } catch (error: unknown) {
-        throw new ServiceError(
-            `Failed to create workout: ${getErrorMessage(error)}`,
-            getErrorCode(error)
-        );
+  try {
+    if (!userId) {
+      throw new Error("User ID is required to create a workout.");
     }
+    if (!workoutData.name) {
+      throw new Error("Workout name is required.");
+    }
+    if (!workoutData.date) {
+      throw new Error("Workout date is required.");
+    }
+
+    const workoutWithUserId: Partial<Workout> = {
+      userId,
+      name: workoutData.name,
+      description: workoutData.description,
+      date: workoutData.date,
+      exercises: [],
+    };
+
+    const workoutId: string = await createDocument(COLLECTION, workoutWithUserId);
+
+    const workoutSnapshot = await getDocumentById(COLLECTION, workoutId);
+    if (!workoutSnapshot.exists) {
+      throw new Error(`Workout with ID ${workoutId} not found after creation.`);
+    }
+
+    const exercisesSnapshot = await getDocuments("exercise-library");
+    const allLibraryExercises: ExerciseLibrary[] = exercisesSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as ExerciseLibrary[];
+
+    let selectedExercises: ExerciseLibrary[] = [];
+    if (options.mode === "random") {
+      if (allLibraryExercises.length === 0) {
+        throw new Error("The exercise library is empty.");
+      }
+      // Randomly shuffle the library and pick the first `count` exercises.
+      const shuffled = allLibraryExercises.sort(() => 0.5 - Math.random());
+      selectedExercises = shuffled.slice(0, options.count);
+    } else if (options.mode === "selected") {
+      // Map the provided exerciseLibraryIds to library exercises.
+      selectedExercises = options.exerciseLibraryIds
+        .map((id) => allLibraryExercises.find((exercise) => exercise.id === id))
+        .filter((exercise): exercise is ExerciseLibrary => !!exercise);
+      if (selectedExercises.length === 0) {
+        throw new Error("No valid exercises found for the provided IDs.");
+      }
+    }
+
+    const createdExercises: Exercise[] = await Promise.all(
+      selectedExercises.map(async (libEx) => {
+        const newExData: Partial<Exercise> = {
+          name: libEx.name,
+          equipment: libEx.equipment,
+          musclesWorked: libEx.musclesWorked,
+          intensity: libEx.intensity,
+          workoutId,
+          userId,
+          sets: 4,
+          reps: 12,
+        };
+        return await createExercise(newExData);
+      })
+    );
+
+    // Update the workout document to include the created exercises.
+    await updateDocument(COLLECTION, workoutId, { exercises: createdExercises });
+
+    // Return the complete workout object.
+    return {
+      id: workoutId,
+      ...workoutWithUserId,
+      exercises: createdExercises,
+    } as Workout;
+  } catch (error: unknown) {
+    throw new ServiceError(
+      `Failed to create workout: ${getErrorMessage(error)}`,
+      getErrorCode(error)
+    );
+  }
 };
 
 /**
@@ -116,6 +132,7 @@ export const getAllWorkoutsByUserId = async (userId: string): Promise<Workout[]>
     try {
         const snapshot: FirebaseFirestore.QuerySnapshot = await getDocuments(COLLECTION);
         const workouts: Workout[] = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as Workout[];
+
         return workouts.filter((workout) => workout.userId === userId);
     } catch (error: unknown) {
         throw new ServiceError(
