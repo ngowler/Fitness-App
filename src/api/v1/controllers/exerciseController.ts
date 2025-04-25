@@ -50,32 +50,6 @@ export const getAllExercises = async (
   };
   
 /**
- * @description Get a specific exercise by ID.
- * @route GET /exercise/:id
- * @returns {Promise<void>}
- */
-export const getExerciseById = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-): Promise<void> => {
-    try {
-        const { id } = req.params;
-
-        const exercise: Exercise = await exerciseService.getExerciseById(id);
-
-        res.status(HTTP_STATUS.OK).json(
-            successResponse(
-                exercise,
-                `Exercise with ID "${id}" retrieved successfully`
-            )
-        );
-    } catch (error) {
-        next(error);
-    }
-};
-
-/**
  * @description Update an exercise in a workout.
  * @route PUT /exercise/:id
  * @returns {Promise<void>}

@@ -85,34 +85,6 @@ describe("Exercise Controller", () => {
         });
     });
 
-    describe("getExerciseById", () => {
-        it("should handle successful retrieval by ID", async () => {
-            const mockExercise: Exercise = {
-                id: "1",
-                workoutId: "123",
-                userId: "123",
-                name: "Push-up",
-                equipment: ["Mat"],
-                musclesWorked: ["Chest", "Triceps"],
-                intensity: "Medium",
-                sets: 5,
-                reps: 15,
-            };
-
-            (exerciseService.getExerciseById as jest.Mock).mockResolvedValue(mockExercise);
-            mockReq.params = { id: "1" };
-
-            await exerciseController.getExerciseById(mockReq as Request, mockRes as Response, mockNext);
-
-            expect(mockRes.status).toHaveBeenCalledWith(HTTP_STATUS.OK);
-            expect(mockRes.json).toHaveBeenCalledWith({
-                status: "success",
-                message: `Exercise with ID "1" retrieved successfully`,
-                data: mockExercise,
-            });
-        });
-    });
-
     describe("updateExercise", () => {
         it("should handle successful update", async () => {
             const updatedExercise: Exercise = {

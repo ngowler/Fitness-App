@@ -79,7 +79,7 @@ export const putUserSchema: ObjectSchema = Joi.object({
     email: Joi.string().email().optional().messages({
         "string.email": "Email must be valid",
     }),
-    // Removed password from update for security and best practice
+
     role: Joi.string()
         .valid("Lite", "Premium", "Trainer", "Admin")
         .optional()

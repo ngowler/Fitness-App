@@ -77,28 +77,6 @@ export const getAllExercises = async (
 };
 
 /**
- * Get a specific exercise by ID.
- * @param {string} id - The ID of the exercise.
- * @returns {Promise<Exercise>}
- */
-export const getExerciseById = async (id: string): Promise<Exercise> => {
-    try {
-        const doc: FirebaseFirestore.DocumentSnapshot = await getDocumentById(COLLECTION, id);
-
-        if (!doc.exists) {
-            throw new Error(`Exercise with ID ${id} not found.`);
-        }
-
-        return { id, ...doc.data() } as Exercise;
-    } catch (error: unknown) {
-        throw new ServiceError(
-            `Failed to retrieve exercise ${id}: ${getErrorMessage(error)}`,
-            getErrorCode(error)
-        );
-    }
-};
-
-/**
  * Update an existing exercise.
  * @param {string} id - The ID of the exercise.
  * @param {Partial<Exercise>} exerciseData - The updated exercise data.

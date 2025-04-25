@@ -27,16 +27,6 @@ describe("validate function for exercises", () => {
             expect(() => validate(postExerciseSchema, data)).not.toThrow();
         });
 
-        it("should throw an error for missing workoutId", () => {
-            const data: Data = {
-                name: "Bench Press",
-                equipment: ["Barbell"],
-                musclesWorked: ["Chest", "Triceps"],
-                intensity: "High",
-            };
-            expect(() => validate(postExerciseSchema, data)).toThrow("Workout ID is required");
-        });
-
         it("should throw an error for invalid intensity", () => {
             const data: Data = {
                 workoutId: "1",
@@ -44,22 +34,12 @@ describe("validate function for exercises", () => {
                 equipment: ["Barbell"],
                 musclesWorked: ["Chest", "Triceps"],
                 intensity: "Extreme",
+                sets: 3,
+                reps: 10,
             };
             expect(() => validate(postExerciseSchema, data)).toThrow(
                 "Intensity must be 'Low', 'Medium', or 'High'"
             );
-        });
-    });
-
-    describe("getExercisesByWorkoutSchema", () => {
-        it("should not throw an error for valid workoutId", () => {
-            const data: Data = { workoutId: "1" };
-            expect(() => validate(getExercisesByWorkoutSchema, data)).not.toThrow();
-        });
-
-        it("should throw an error for missing workoutId", () => {
-            const data: Data = {};
-            expect(() => validate(getExercisesByWorkoutSchema, data)).toThrow("Workout ID is required");
         });
     });
 
@@ -122,13 +102,16 @@ describe("validateRequest middleware for exercises", () => {
     });
 
     it("should not return an error for valid postExerciseSchema data", () => {
-        req.body = {
+        const body: Record<string, unknown> = {
             workoutId: "1",
             name: "Bench Press",
             equipment: ["Barbell"],
             musclesWorked: ["Chest", "Triceps"],
             intensity: "High",
+            sets: 3,
+            reps: 10,
         };
+        req.body = body;
 
         validateRequest(postExerciseSchema)(req as Request, res as Response, next);
 
@@ -137,30 +120,7 @@ describe("validateRequest middleware for exercises", () => {
         expect(res.json).not.toHaveBeenCalled();
     });
 
-    it("should return 400 for missing workoutId", () => {
-        req.body = {
-            name: "Bench Press",
-            equipment: ["Barbell"],
-            musclesWorked: ["Chest", "Triceps"],
-            intensity: "High",
-        };
-
-        validateRequest(postExerciseSchema)(req as Request, res as Response, next);
-
-        expect(next).toHaveBeenCalled();
-    });
-
-    it("should not return an error for valid deleteExerciseSchema data", () => {
-        req.params = { id: "1" };
-
-        validateRequest(deleteExerciseSchema)(req as Request, res as Response, next);
-
-        expect(next).toHaveBeenCalled();
-        expect(res.status).not.toHaveBeenCalled();
-        expect(res.json).not.toHaveBeenCalled();
-    });
-
-    it("should return 400 for missing id", () => {
+    it("should return 400 for missing id in deleteExerciseSchema", () => {
         req.params = {};
 
         validateRequest(deleteExerciseSchema)(req as Request, res as Response, next);

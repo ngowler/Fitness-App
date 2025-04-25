@@ -4,7 +4,6 @@ import isAuthorized from "../middleware/authorize";
 import {
     createExercise,
     getAllExercises,
-    getExerciseById,
     updateExercise,
     deleteExercise,
 } from "../controllers/exerciseController";
@@ -98,46 +97,6 @@ router.get(
     isAuthorized({ allowSameUser: true, hasRole: ["trainer"] }),
     validateRequest(getExercisesByWorkoutSchema),
     getAllExercises
-);
-
-/**
- * @route GET /exercise/{id}
- * @description Retrieve details of a specific exercise by ID.
- * 
- * @openapi
- * /exercise/{id}:
- *   get:
- *     summary: Get a specific exercise
- *     tags: [Exercise]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: The ID of the exercise to retrieve
- *     responses:
- *       200:
- *         description: Exercise retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Exercise'
- *       404:
- *         description: Exercise not found
- *       401:
- *         description: Unauthorized access
- *       500:
- *         description: Server error
- */
-router.get(
-    "/:id",
-    authenticate,
-    isAuthorized({ allowSameUser: true, hasRole: ["trainer"] }),
-    validateRequest(getExerciseByIdSchema),
-    getExerciseById
 );
 
 /**

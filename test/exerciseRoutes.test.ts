@@ -5,7 +5,6 @@ import app from "../src/app";
 import {
     createExercise,
     getAllExercises,
-    getExerciseById,
     updateExercise,
     deleteExercise,
 } from "../src/api/v1/controllers/exerciseController";
@@ -54,14 +53,37 @@ jest.mock("../src/api/v1/middleware/authorize", () =>
 jest.mock("../src/api/v1/controllers/exerciseController", () => ({
     createExercise: jest.fn((req, res) => res.status(201).json({ message: "Exercise created successfully" })),
     getAllExercises: jest.fn((req, res) => res.status(200).json({ exercises: ["Exercise1", "Exercise2"] })),
-    getExerciseById: jest.fn((req, res) => res.status(200).json({ exercise: "Exercise1" })),
     updateExercise: jest.fn((req, res) => res.status(200).json({ message: "Exercise updated successfully" })),
     deleteExercise: jest.fn((req, res) => res.status(204).send()),
 }));
+  
 
 describe("Exercise Routes", () => {
     afterEach(() => {
         jest.clearAllMocks();
+    });
+
+    describe("POST /api/v1/exercise", () => {
+        it("should allow authorized users to create an exercise", async () => {
+            const mockExercise: Partial<Exercise> = {
+                name: "Push-up",
+                equipment: ["None"],
+                musclesWorked: ["Chest", "Triceps"],
+                intensity: "Medium",
+                sets: 5,
+                reps: 15,
+            };            
+
+            const response: supertest.Response = await request(app)
+                .post("/api/v1/exercise")
+                .set("authorization", "Bearer token")
+                .set("x-roles", "trainer")
+                .send(mockExercise);
+
+            expect(response.status).toBe(201);
+            expect(response.body.message).toBe("Exercise created successfully");
+            expect(createExercise).toHaveBeenCalled();
+        });
     });
 
     describe("GET /api/v1/exercise", () => {
@@ -81,7 +103,6 @@ describe("Exercise Routes", () => {
         it("should allow authorized users to update an exercise", async () => {
             const exerciseId: string = "exercise123";
             const updatedExercise: Partial<Exercise> = {
-                userId: "123",
                 name: "Updated Push-up",
                 equipment: ["None"],
                 musclesWorked: ["Chest", "Triceps"],
@@ -94,6 +115,7 @@ describe("Exercise Routes", () => {
                 .put(`/api/v1/exercise/${exerciseId}`)
                 .set("authorization", "Bearer token")
                 .set("x-roles", "trainer")
+                .send(updatedExercise);
 
             expect(response.status).toBe(200);
             expect(response.body.message).toBe("Exercise updated successfully");
