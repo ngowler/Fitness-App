@@ -62,16 +62,16 @@ export const postUserSchema: ObjectSchema = Joi.object({
 });
 
 export const getUserByIdSchema: ObjectSchema = Joi.object({
-    id: Joi.string().required().messages({
-        "any.required": "User ID is required",
-        "string.empty": "User ID cannot be empty",
+    uid: Joi.string().required().messages({
+        "any.required": "User uid is required",
+        "string.empty": "User uid cannot be empty",
     }),
 });
 
 export const putUserSchema: ObjectSchema = Joi.object({
-    id: Joi.string().required().messages({
-        "any.required": "User ID is required",
-        "string.empty": "User ID cannot be empty",
+    uid: Joi.string().required().messages({
+        "any.required": "User uid is required",
+        "string.empty": "User uid cannot be empty",
     }),
     name: Joi.string().optional().messages({
         "string.empty": "Name cannot be empty",
@@ -108,8 +108,8 @@ export const putUserSchema: ObjectSchema = Joi.object({
 });
 
 export const deleteUserSchema: ObjectSchema = Joi.object({
-    id: Joi.string().required().messages({
-        "any.required": "User ID is required",
-        "string.empty": "User ID cannot be empty",
+    uid: Joi.string().required().messages({
+        "any.required": "User uid is required",
+        "string.empty": "User uid cannot be empty",
     }),
 });
