@@ -14,6 +14,9 @@
  *         workoutId:
  *           type: string
  *           description: The unique identifier for the workout associated with the exercise.
+ *         userId:
+ *           type: string
+ *           description: The unique identifier for the user associated with the exercise.
  *         name:
  *           type: string
  *           description: The name of the exercise.
@@ -42,12 +45,13 @@
  *           description: The number of repetitions per set for the exercise (optional).
  */
 export type Exercise = {
-    id?: string;
-    workoutId: string;
-    name: string;
-    equipment: string[];
-    musclesWorked: string[];
-    intensity: "Low" | "Medium" | "High";
-    sets?: number;
-    reps?: number;
+    id?: string; // Optional identifier for the exercise
+    workoutId: string; // Identifier for the workout associated with the exercise
+    userId: string; // Identifier for the user associated with the exercise
+    name: string; // Name of the exercise
+    equipment: string[]; // List of required equipment
+    musclesWorked: string[]; // List of targeted muscles
+    intensity: "Low" | "Medium" | "High"; // Exercise intensity
+    sets?: number; // Optional sets for the exercise
+    reps?: number; // Optional repetitions per set
 };

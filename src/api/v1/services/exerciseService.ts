@@ -14,6 +14,7 @@ const COLLECTION: string = "exercises";
 
 /**
  * Create a new exercise for a workout and update the workout's exercises list.
+ * Ensures the workout belongs to the authenticated user.
  * @param {Partial<Exercise>} exerciseData - The data for the new exercise.
  * @returns {Promise<Exercise>}
  */
@@ -25,18 +26,24 @@ export const createExercise = async (
             throw new Error("Workout ID is required to create an exercise.");
         }
 
-        const exerciseId: string = await createDocument(COLLECTION, exerciseData);
-        const newExercise: Exercise = { id: exerciseId, ...exerciseData } as Exercise;
-
         const workoutSnapshot: FirebaseFirestore.DocumentSnapshot = await getDocumentById(
             "workouts",
             exerciseData.workoutId
         );
+
         if (!workoutSnapshot.exists) {
             throw new Error(`Workout with ID ${exerciseData.workoutId} not found.`);
         }
 
         const workoutData: Workout = workoutSnapshot.data() as Workout;
+
+        if (workoutData.userId !== exerciseData.userId) {
+            throw new Error(`User does not own the workout with ID ${exerciseData.workoutId}.`);
+        }
+
+        const exerciseId: string = await createDocument(COLLECTION, exerciseData);
+        const newExercise: Exercise = { id: exerciseId, ...exerciseData } as Exercise;
+
         const updatedExercises: Exercise[] = [...(workoutData.exercises || []), newExercise];
 
         await updateDocument("workouts", exerciseData.workoutId, { exercises: updatedExercises });

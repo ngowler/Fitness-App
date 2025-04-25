@@ -25,18 +25,13 @@ export const createExercise = async (
     }
 };
 
-/**
- * @description Get all exercises for a specific workout.
- * @route GET /exercise/
- * @returns {Promise<void>}
- */
 export const getAllExercises = async (
     req: Request,
     res: Response,
     next: NextFunction
 ): Promise<void> => {
     try {
-        const { workoutId } = req.query;
+        const { workoutId } = req.params;
 
         const exercises: Exercise[] = await exerciseService.getAllExercises(workoutId as string);
 
