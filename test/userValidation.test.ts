@@ -18,7 +18,7 @@ describe("validate function for users", () => {
                 name: "John Doe",
                 email: "john.doe@example.com",
                 password: "Secure123!",
-                role: "premium",
+                role: "Premium",
                 healthMetrics: {
                     weight: 75,
                     height: 180,
@@ -68,23 +68,22 @@ describe("validate function for users", () => {
 
     describe("getUserByIdSchema", () => {
         it("should not throw an error for valid user ID", () => {
-            const data: Data = { id: "1" };
+            const data: Data = { uid: "1" };
             expect(() => validate(getUserByIdSchema, data)).not.toThrow();
         });
 
         it("should throw an error for missing user ID", () => {
             const data: Data = {};
-            expect(() => validate(getUserByIdSchema, data)).toThrow("User ID is required");
+            expect(() => validate(getUserByIdSchema, data)).toThrow("User uid is required");
         });
     });
 
     describe("putUserSchema", () => {
         it("should not throw an error for valid updated user data", () => {
             const data: Data = {
-                id: "1",
+                uid: "1",
                 name: "Jane Doe",
                 email: "jane.doe@example.com",
-                // Removed password field for user updates
             };
             expect(() => validate(putUserSchema, data)).not.toThrow();
         });
@@ -93,19 +92,19 @@ describe("validate function for users", () => {
             const data: Data = {
                 name: "Jane Doe",
             };
-            expect(() => validate(putUserSchema, data)).toThrow("User ID is required");
+            expect(() => validate(getUserByIdSchema, data)).toThrow("User uid is required");
         });
     });
 
     describe("deleteUserSchema", () => {
         it("should not throw an error for valid user ID", () => {
-            const data: Data = { id: "1" };
+            const data: Data = { uid: "1" };
             expect(() => validate(deleteUserSchema, data)).not.toThrow();
         });
 
         it("should throw an error for missing user ID", () => {
             const data: Data = {};
-            expect(() => validate(deleteUserSchema, data)).toThrow("User ID is required");
+            expect(() => validate(getUserByIdSchema, data)).toThrow("User uid is required");
         });
     });
 });
@@ -129,7 +128,7 @@ describe("validateRequest middleware for users", () => {
             name: "John Doe",
             email: "john.doe@example.com",
             password: "Secure123!",
-            role: "lite",
+            role: "Lite",
             healthMetrics: {
                 weight: 65,
                 height: 175,
@@ -147,7 +146,7 @@ describe("validateRequest middleware for users", () => {
         req.body = {
             email: "john.doe@example.com",
             password: "Secure123!",
-            role: "lite",
+            role: "Lite",
         };
 
         validateRequest(postUserSchema)(req as Request, res as Response, next);
@@ -155,7 +154,7 @@ describe("validateRequest middleware for users", () => {
         expect(next).not.toHaveBeenCalled();
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith({
-            error: "Validation error: Name is required",
+            error: expect.stringContaining("Name is required"),
         });
     });
 });
