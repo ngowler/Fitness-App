@@ -31,7 +31,7 @@ export const getAllExercises = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        let workoutId: string | undefined = req.params.workoutId?.trim() || undefined;
+        const workoutId: string | undefined = req.params.workoutId?.trim() || undefined;
         const userId: string = res.locals.uid;
         const userRole: string = res.locals.role;
   
